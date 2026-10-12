@@ -167,6 +167,11 @@
             Backup .rsc
           </button>
 
+          <button onclick="openInspectModal()" class="px-3 py-2 text-xs font-medium rounded-xl bg-slate-800/80 hover:bg-slate-700 text-slate-200 border border-slate-700/80 transition flex items-center gap-1.5 shadow-sm" title="Lihat Perintah Asli MikroTik">
+            <svg class="w-3.5 h-3.5 text-cyan-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>
+            👁️ Cek Settingan Router
+          </button>
+
           <button onclick="openAutoSetupModal()" class="px-3.5 py-2 text-xs font-medium rounded-xl bg-slate-800/90 hover:bg-slate-700 text-slate-200 border border-slate-700 transition flex items-center gap-1.5 shadow-sm">
             <svg class="w-4 h-4 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
             Auto Setup 1-Klik
@@ -188,6 +193,9 @@
         <div class="flex items-center gap-1.5 md:hidden">
           <button onclick="openOnlineModal()" class="p-2 text-xs rounded-lg bg-emerald-500/10 text-emerald-400 border border-emerald-500/40" title="Akses Online HP">
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z"></path></svg>
+          </button>
+          <button onclick="openInspectModal()" class="p-2 text-xs rounded-lg bg-slate-800 text-cyan-400 border border-slate-700" title="Cek Settingan Router">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>
           </button>
           <button onclick="openRenameModal()" class="p-2 text-xs rounded-lg bg-slate-800 text-indigo-400 border border-slate-700" title="Ganti Nama WiFi">
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
@@ -668,6 +676,75 @@
     </div>
   </div>
 
+  <!-- MODAL 4: VERIFIKASI SETTINGAN ASLI MIKROTIK -->
+  <div id="inspectModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 hidden flex items-end sm:items-center justify-center p-0 sm:p-4">
+    <div class="bg-slate-900 border border-slate-800 rounded-t-2xl sm:rounded-2xl max-w-2xl w-full p-5 sm:p-6 shadow-2xl space-y-4 max-h-[92vh] overflow-y-auto">
+      
+      <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+        <div class="flex items-center gap-2.5">
+          <div class="w-8 h-8 rounded-lg bg-cyan-500/20 text-cyan-400 flex items-center justify-center border border-cyan-500/30">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>
+          </div>
+          <div>
+            <h3 class="font-bold text-white text-sm sm:text-base">Pratinjau & Verifikasi Settingan MikroTik</h3>
+            <p class="text-[11px] text-slate-400">Pastikan settingan ini benar sesuai standar RouterOS v7</p>
+          </div>
+        </div>
+        <button onclick="closeInspectModal()" class="text-slate-400 hover:text-white text-xl p-1 font-bold">&times;</button>
+      </div>
+
+      <!-- Quick Guidance Table -->
+      <div class="bg-slate-950 p-3.5 rounded-xl border border-slate-800 space-y-2 text-xs">
+        <div class="font-bold text-white text-[11px] flex items-center gap-1.5">
+          <span>📍</span> <span>Di Mana Letak Menu Ini di Winbox / WebFig (192.168.88.1)?</span>
+        </div>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-[11px] text-slate-300">
+          <div class="p-2.5 rounded-lg bg-slate-900 border border-slate-800">
+            <span class="text-indigo-400 font-bold block mb-0.5">1. Jatah Bandwidth (Mbps):</span>
+            Menu <code class="text-emerald-400 font-mono">Queues</code> ➡️ Tab <code class="text-emerald-400 font-mono">Simple Queues</code>
+          </div>
+          <div class="p-2.5 rounded-lg bg-slate-900 border border-slate-800">
+            <span class="text-indigo-400 font-bold block mb-0.5">2. Anti-Konflik IP 6 WiFi:</span>
+            Menu <code class="text-emerald-400 font-mono">IP</code> ➡️ <code class="text-emerald-400 font-mono">DHCP Server</code> ➡️ Tab <code class="text-emerald-400 font-mono">Leases</code>
+          </div>
+          <div class="p-2.5 rounded-lg bg-slate-900 border border-slate-800">
+            <span class="text-indigo-400 font-bold block mb-0.5">3. Internet Indibiz 300M:</span>
+            Menu <code class="text-emerald-400 font-mono">IP</code> ➡️ <code class="text-emerald-400 font-mono">DHCP Client</code> & <code class="text-emerald-400 font-mono">Firewall NAT</code>
+          </div>
+          <div class="p-2.5 rounded-lg bg-slate-900 border border-slate-800">
+            <span class="text-indigo-400 font-bold block mb-0.5">4. Bridge Switch Hub:</span>
+            Menu <code class="text-emerald-400 font-mono">Bridge</code> ➡️ Tab <code class="text-emerald-400 font-mono">Ports</code> (Port 2 ke Hub)
+          </div>
+        </div>
+      </div>
+
+      <!-- Filter Tabs -->
+      <div class="flex items-center gap-1.5 overflow-x-auto pb-1 border-b border-slate-800 text-xs no-scrollbar">
+        <button onclick="switchInspectTab('all')" id="tabInspectAll" class="px-3 py-1.5 rounded-lg bg-indigo-600 text-white font-medium flex-shrink-0">Semua Script</button>
+        <button onclick="switchInspectTab('queues')" id="tabInspectQueues" class="px-3 py-1.5 rounded-lg bg-slate-800 text-slate-300 hover:text-white flex-shrink-0">Bandwidth (Queues)</button>
+        <button onclick="switchInspectTab('leases')" id="tabInspectLeases" class="px-3 py-1.5 rounded-lg bg-slate-800 text-slate-300 hover:text-white flex-shrink-0">Anti-Konflik IP</button>
+        <button onclick="switchInspectTab('network')" id="tabInspectNetwork" class="px-3 py-1.5 rounded-lg bg-slate-800 text-slate-300 hover:text-white flex-shrink-0">Internet & Bridge</button>
+      </div>
+
+      <!-- Code Box -->
+      <div class="relative">
+        <pre id="inspectCodeBox" class="bg-slate-950 p-4 rounded-xl border border-slate-800 text-[11px] font-mono text-emerald-300 overflow-x-auto max-h-64 leading-relaxed select-all whitespace-pre-wrap"></pre>
+        <button onclick="copyInspectCode()" class="absolute top-2.5 right-2.5 px-2.5 py-1 rounded-lg bg-slate-800/90 hover:bg-slate-700 text-white text-[10px] font-semibold flex items-center gap-1 border border-slate-700 shadow">
+          <span>📋 Salin</span>
+        </button>
+      </div>
+
+      <div class="flex items-center justify-between pt-2 border-t border-slate-800">
+        <button onclick="downloadClientRscScript()" class="px-4 py-2 text-xs font-semibold rounded-xl bg-slate-800 hover:bg-slate-700 text-white transition flex items-center gap-1.5">
+          <svg class="w-3.5 h-3.5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+          Unduh File .rsc
+        </button>
+        <button onclick="closeInspectModal()" class="px-4 py-2 text-xs rounded-xl text-slate-300 hover:bg-slate-800 transition">Tutup</button>
+      </div>
+
+    </div>
+  </div>
+
   <!-- Toast Notification -->
   <div id="toast" class="fixed bottom-20 md:bottom-5 right-5 left-5 md:left-auto md:w-80 bg-slate-800 border border-slate-700 text-white text-xs px-4 py-3 rounded-2xl shadow-2xl hidden items-center gap-3 z-50 transition-all">
     <div id="toastIcon">
@@ -742,6 +819,100 @@
       } else {
         passInput.type = 'password';
       }
+    }
+
+    function openInspectModal() {
+      switchInspectTab('all');
+      document.getElementById('inspectModal').classList.remove('hidden');
+    }
+
+    function closeInspectModal() {
+      document.getElementById('inspectModal').classList.add('hidden');
+    }
+
+    function switchInspectTab(type) {
+      const tabs = ['all', 'queues', 'leases', 'network'];
+      tabs.forEach(t => {
+        const el = document.getElementById('tabInspect' + t.charAt(0).toUpperCase() + t.slice(1));
+        if (el) {
+          if (t === type) {
+            el.className = "px-3 py-1.5 rounded-lg bg-indigo-600 text-white font-medium flex-shrink-0";
+          } else {
+            el.className = "px-3 py-1.5 rounded-lg bg-slate-800 text-slate-300 hover:text-white flex-shrink-0";
+          }
+        }
+      });
+
+      const codeBox = document.getElementById('inspectCodeBox');
+      if (type === 'all') {
+        codeBox.innerText = generateFullScriptText();
+      } else if (type === 'queues') {
+        let q = `# --- SIMPLE QUEUES (LIMIT MBPS TIAP WIFI) ---\n`;
+        wifiData.forEach(w => {
+          const cleanName = w.name.replace(/[^a-zA-Z0-9_-]/g, '_');
+          q += `/queue simple add name="${cleanName}" target=${w.ip}/32 max-limit=${w.upload}M/${w.download}M comment="SMANSA Bandwidth"\n`;
+        });
+        codeBox.innerText = q;
+      } else if (type === 'leases') {
+        let l = `# --- ANTI-KONFLIK IP (KUNCI STATIC LEASE DHCP) ---\n`;
+        wifiData.forEach(w => {
+          const cleanName = w.name.replace(/[^a-zA-Z0-9_-]/g, '_');
+          l += `/ip dhcp-server lease add address=${w.ip} comment="${cleanName}"\n`;
+        });
+        codeBox.innerText = l;
+      } else if (type === 'network') {
+        let n = `# --- BRIDGE PORT 2-5 KE SWITCH TL-SG1016D ---\n`;
+        n += `/interface bridge add name=bridge-LAN comment="Bridge Switch Hub SMANSA"\n`;
+        n += `/interface bridge port add bridge=bridge-LAN interface=ether2 comment="Ke Switch Hub TL-SG1016D"\n`;
+        n += `/interface bridge port add bridge=bridge-LAN interface=ether3\n`;
+        n += `/interface bridge port add bridge=bridge-LAN interface=ether4\n`;
+        n += `/interface bridge port add bridge=bridge-LAN interface=ether5\n\n`;
+        n += `# --- INTERNET INDIBIZ 300 MBPS (ETHER 1) ---\n`;
+        n += `/ip dhcp-client add interface=ether1 disabled=no use-peer-dns=yes add-default-route=yes comment="Indibiz 300 Mbps"\n`;
+        n += `/ip address add address=192.168.88.1/24 interface=bridge-LAN comment="Gateway LAN SMANSA"\n`;
+        n += `/ip dns set allow-remote-requests=yes servers=1.1.1.1,8.8.8.8\n`;
+        n += `/ip firewall nat add chain=srcnat out-interface=ether1 action=masquerade comment="NAT Internet Indibiz"\n`;
+        codeBox.innerText = n;
+      }
+    }
+
+    function generateFullScriptText() {
+      let s = `# ========================================================\n`;
+      s += `# SCRIPT KONFIGURASI MIKROTIK SMANSA (hEX E50UG)\n`;
+      s += `# Tanggal: ${new Date().toLocaleString()}\n`;
+      s += `# ========================================================\n\n`;
+      s += `/system identity set name="MikroTik-SMANSA"\n\n`;
+      s += `# 1. Bridge LAN Switch Hub TL-SG1016D\n`;
+      s += `/interface bridge add name=bridge-LAN comment="Bridge Switch Hub SMANSA"\n`;
+      s += `/interface bridge port add bridge=bridge-LAN interface=ether2 comment="Ke Switch Hub TL-SG1016D"\n`;
+      s += `/interface bridge port add bridge=bridge-LAN interface=ether3\n`;
+      s += `/interface bridge port add bridge=bridge-LAN interface=ether4\n`;
+      s += `/interface bridge port add bridge=bridge-LAN interface=ether5\n\n`;
+      s += `# 2. Internet Indibiz 300 Mbps\n`;
+      s += `/ip dhcp-client add interface=ether1 disabled=no use-peer-dns=yes add-default-route=yes comment="Indibiz 300 Mbps"\n`;
+      s += `/ip address add address=192.168.88.1/24 interface=bridge-LAN comment="Gateway LAN SMANSA"\n`;
+      s += `/ip dns set allow-remote-requests=yes servers=1.1.1.1,8.8.8.8\n`;
+      s += `/ip firewall nat add chain=srcnat out-interface=ether1 action=masquerade comment="NAT Internet Indibiz"\n\n`;
+      s += `# 3. Anti-Konflik IP: Kunci IP Statis 6 Router WiFi\n`;
+      wifiData.forEach(w => {
+        const cleanName = w.name.replace(/[^a-zA-Z0-9_-]/g, '_');
+        s += `/ip dhcp-server lease add address=${w.ip} comment="${cleanName}"\n`;
+      });
+      s += `\n# 4. Simple Queues (Jatah Bandwidth Tiap WiFi)\n`;
+      wifiData.forEach(w => {
+        const cleanName = w.name.replace(/[^a-zA-Z0-9_-]/g, '_');
+        s += `/queue simple add name="${cleanName}" target=${w.ip}/32 max-limit=${w.upload}M/${w.download}M comment="SMANSA Bandwidth"\n`;
+      });
+      return s;
+    }
+
+    function copyInspectCode() {
+      const code = document.getElementById('inspectCodeBox').innerText;
+      navigator.clipboard.writeText(code).then(() => {
+        showToast("Script MikroTik berhasil disalin!");
+      }).catch(() => {
+        showToast("Gagal menyalin script.");
+      });
     }
 
     const wifiData = [
