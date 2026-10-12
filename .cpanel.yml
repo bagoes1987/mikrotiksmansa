@@ -1,0 +1,6 @@
+---
+deployment:
+  tasks:
+    - export DEPLOYPATH=$(pwd | sed 's|/repositories/.*||')/public_html/mikrotiksmansa/
+    - /bin/cp -R * $DEPLOYPATH
+    - /bin/chmod 755 $DEPLOYPATH

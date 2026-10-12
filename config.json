@@ -1,0 +1,15 @@
+{
+  "serverPort": 3000,
+  "mikrotik": {
+    "host": "192.168.88.1",
+    "port": 80,
+    "username": "admin",
+    "password": "F2NTZUAKWZ",
+    "useHttps": false
+  },
+  "network": {
+    "ispTotalMbps": 300,
+    "wanInterface": "ether1",
+    "lanBridge": "bridge-LAN"
+  }
+}

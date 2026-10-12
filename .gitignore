@@ -1,0 +1,5 @@
+cloudflared.exe
+tunnel.log
+*.zip
+*.log
+node_modules/

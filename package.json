@@ -1,0 +1,17 @@
+{
+  "name": "mikrotik-smansa",
+  "version": "1.0.0",
+  "description": "Smart Bandwidth Management and Router Configuration Dashboard for SMAN 1",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "keywords": [
+    "mikrotik",
+    "bandwidth-management",
+    "smansa",
+    "routeros"
+  ],
+  "author": "SMANSA IT Team",
+  "license": "ISC"
+}
