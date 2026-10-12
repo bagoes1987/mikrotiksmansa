@@ -81,3 +81,9 @@
 } else={
   /queue simple set [find target="192.168.88.16/32"] max-limit=10M/20M disabled=no
 }
+
+# 7. Firewall Filter: Drop Perangkat Terblokir (Blacklist)
+:if ([:len [/ip firewall filter find comment="DROP_BLOCKED_CLIENTS"]] = 0) do={
+  /ip firewall filter add chain=forward src-address-list=BLOCKED_CLIENTS action=drop comment="DROP_BLOCKED_CLIENTS"
+}
+

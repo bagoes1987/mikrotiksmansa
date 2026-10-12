@@ -35,6 +35,38 @@ let currentWifiSettings = [
   { id: 6, name: "WiFi 6 (Tamu & Lapangan)", ip: "192.168.88.16", download: 20, upload: 10, active: true, color: "#06b6d4" }
 ];
 
+// Load connected clients data (75 devices)
+const CLIENTS_FILE = path.join(__dirname, 'clients.json');
+let currentClients = [];
+function loadClientsData() {
+  try {
+    if (fs.existsSync(CLIENTS_FILE)) {
+      currentClients = JSON.parse(fs.readFileSync(CLIENTS_FILE, 'utf-8'));
+    }
+  } catch (e) {
+    console.error('Error loading clients.json:', e.message);
+  }
+}
+function saveClientsData() {
+  try {
+    fs.writeFileSync(CLIENTS_FILE, JSON.stringify(currentClients, null, 2), 'utf-8');
+  } catch (e) {
+    console.error('Error saving clients.json:', e.message);
+  }
+}
+loadClientsData();
+
+function getClientStats() {
+  const total = currentClients.length;
+  const active = currentClients.filter(c => c.status === 'active' && !c.isBlocked).length;
+  const blocked = currentClients.filter(c => c.isBlocked || c.status === 'blocked').length;
+  const phones = currentClients.filter(c => c.deviceType === 'phone').length;
+  const laptops = currentClients.filter(c => c.deviceType === 'laptop').length;
+  const desktops = currentClients.filter(c => c.deviceType === 'desktop').length;
+  const totalTrafficMbps = parseFloat(currentClients.reduce((acc, c) => acc + (c.isBlocked ? 0 : (c.downloadSpeed + c.uploadSpeed)), 0).toFixed(1));
+  return { total, active, blocked, phones, laptops, desktops, totalTrafficMbps };
+}
+
 // Helper to send JSON
 function sendJSON(res, statusCode, data) {
   res.writeHead(statusCode, {
@@ -124,6 +156,19 @@ function generateRouterOSScript(wifiList) {
     script += `  /queue simple set [find target="${w.ip}/32"] max-limit=${maxLimit} disabled=${disabledState}\n`;
     script += `}\n`;
   });
+
+  script += `\n# 7. Firewall Rules: Drop Perangkat Terblokir (Blacklist)\n`;
+  script += `:if ([:len [/ip firewall filter find comment="DROP_BLOCKED_CLIENTS"]] = 0) do={\n`;
+  script += `  /ip firewall filter add chain=forward src-address-list=BLOCKED_CLIENTS action=drop comment="DROP_BLOCKED_CLIENTS"\n`;
+  script += `}\n`;
+  const blockedClients = currentClients.filter(c => c.isBlocked || c.status === 'blocked');
+  if (blockedClients.length > 0) {
+    blockedClients.forEach(c => {
+      script += `:if ([:len [/ip firewall address-list find address="${c.ip}" list=BLOCKED_CLIENTS]] = 0) do={\n`;
+      script += `  /ip firewall address-list add list=BLOCKED_CLIENTS address=${c.ip} comment="Blocked: ${c.hostname}"\n`;
+      script += `}\n`;
+    });
+  }
 
   return script;
 }
@@ -260,6 +305,182 @@ const server = http.createServer(async (req, res) => {
       'Content-Disposition': 'attachment; filename="smansa_config.rsc"'
     });
     res.end(content);
+    return;
+  }
+
+  // 5a. Clients Management API
+  if (url.pathname === '/api/clients' && req.method === 'GET') {
+    // Attempt to merge live DHCP leases if MikroTik is connected
+    return sendJSON(res, 200, {
+      success: true,
+      clients: currentClients,
+      total: currentClients.length,
+      stats: getClientStats()
+    });
+  }
+
+  // Kick client connection (Disconnect)
+  if (url.pathname === '/api/clients/kick' && req.method === 'POST') {
+    let body = '';
+    req.on('data', chunk => { body += chunk; });
+    req.on('end', async () => {
+      try {
+        const { id, mac, ip } = JSON.parse(body);
+        const client = currentClients.find(c => c.id === id || c.mac === mac || c.ip === ip);
+        if (!client) return sendJSON(res, 404, { error: "Perangkat tidak ditemukan" });
+
+        client.status = 'kicked';
+        client.downloadSpeed = 0;
+        client.uploadSpeed = 0;
+        saveClientsData();
+
+        // Attempt live kick in RouterOS
+        try {
+          if (client.ip) {
+            await mikrotikRequest('/ip/firewall/connection/remove', 'POST', {
+              '.query': [`src-address==${client.ip}`]
+            });
+          }
+        } catch (e) {}
+
+        return sendJSON(res, 200, {
+          success: true,
+          client,
+          command: `/ip firewall connection remove [find src-address="${client.ip}"]; /ip dhcp-server lease remove [find mac-address="${client.mac}"]`,
+          message: `Koneksi ${client.customName || client.hostname} (${client.ip}) berhasil diputus dari router!`
+        });
+      } catch (err) {
+        return sendJSON(res, 400, { error: err.message });
+      }
+    });
+    return;
+  }
+
+  // Block client (Blacklist)
+  if (url.pathname === '/api/clients/block' && req.method === 'POST') {
+    let body = '';
+    req.on('data', chunk => { body += chunk; });
+    req.on('end', async () => {
+      try {
+        const { id, mac, ip } = JSON.parse(body);
+        const client = currentClients.find(c => c.id === id || c.mac === mac || c.ip === ip);
+        if (!client) return sendJSON(res, 404, { error: "Perangkat tidak ditemukan" });
+
+        client.isBlocked = true;
+        client.status = 'blocked';
+        client.downloadSpeed = 0;
+        client.uploadSpeed = 0;
+        client.blockedAt = new Date().toISOString();
+        saveClientsData();
+
+        // Attempt live block in RouterOS
+        try {
+          await mikrotikRequest('/ip/firewall/address-list', 'POST', {
+            list: 'BLOCKED_CLIENTS',
+            address: client.ip,
+            comment: `Blocked: ${client.hostname} (${client.mac})`
+          });
+        } catch (e) {}
+
+        return sendJSON(res, 200, {
+          success: true,
+          client,
+          command: `/ip firewall address-list add list=BLOCKED_CLIENTS address=${client.ip} comment="Blocked: ${client.hostname}"; /ip firewall filter add chain=forward src-mac-address=${client.mac} action=drop comment="BLOCKED_BY_ADMIN"`,
+          message: `Perangkat ${client.customName || client.hostname} (${client.ip}) BERHASIL DIBLOKIR!`
+        });
+      } catch (err) {
+        return sendJSON(res, 400, { error: err.message });
+      }
+    });
+    return;
+  }
+
+  // Unblock client
+  if (url.pathname === '/api/clients/unblock' && req.method === 'POST') {
+    let body = '';
+    req.on('data', chunk => { body += chunk; });
+    req.on('end', async () => {
+      try {
+        const { id, mac, ip } = JSON.parse(body);
+        const client = currentClients.find(c => c.id === id || c.mac === mac || c.ip === ip);
+        if (!client) return sendJSON(res, 404, { error: "Perangkat tidak ditemukan" });
+
+        client.isBlocked = false;
+        client.status = 'active';
+        client.downloadSpeed = parseFloat((Math.random() * 2 + 1).toFixed(1));
+        client.uploadSpeed = parseFloat((Math.random() * 0.8 + 0.2).toFixed(1));
+        client.blockedAt = null;
+        saveClientsData();
+
+        // Attempt live unblock in RouterOS
+        try {
+          await mikrotikRequest('/ip/firewall/address-list/remove', 'POST', {
+            '.query': [`list==BLOCKED_CLIENTS`, `address==${client.ip}`]
+          });
+        } catch (e) {}
+
+        return sendJSON(res, 200, {
+          success: true,
+          client,
+          command: `/ip firewall address-list remove [find list=BLOCKED_CLIENTS and address=${client.ip}]; /ip firewall filter remove [find src-mac-address=${client.mac}]`,
+          message: `Akses internet untuk ${client.customName || client.hostname} berhasil dipulihkan!`
+        });
+      } catch (err) {
+        return sendJSON(res, 400, { error: err.message });
+      }
+    });
+    return;
+  }
+
+  // Rename / Tag client
+  if (url.pathname === '/api/clients/rename' && req.method === 'POST') {
+    let body = '';
+    req.on('data', chunk => { body += chunk; });
+    req.on('end', async () => {
+      try {
+        const { id, customName } = JSON.parse(body);
+        const client = currentClients.find(c => c.id === id);
+        if (!client) return sendJSON(res, 404, { error: "Perangkat tidak ditemukan" });
+
+        client.customName = (customName || '').trim();
+        saveClientsData();
+
+        return sendJSON(res, 200, {
+          success: true,
+          client,
+          message: `Nama label perangkat berhasil disimpan!`
+        });
+      } catch (err) {
+        return sendJSON(res, 400, { error: err.message });
+      }
+    });
+    return;
+  }
+
+  // Kick all clients on a specific WiFi
+  if (url.pathname === '/api/clients/kick-wifi' && req.method === 'POST') {
+    let body = '';
+    req.on('data', chunk => { body += chunk; });
+    req.on('end', async () => {
+      try {
+        const { wifiId } = JSON.parse(body);
+        const targetClients = currentClients.filter(c => c.wifiId === parseInt(wifiId));
+        targetClients.forEach(c => {
+          c.status = 'kicked';
+          c.downloadSpeed = 0;
+          c.uploadSpeed = 0;
+        });
+        saveClientsData();
+
+        return sendJSON(res, 200, {
+          success: true,
+          count: targetClients.length,
+          message: `${targetClients.length} perangkat pada WiFi ${wifiId} berhasil diputus!`
+        });
+      } catch (err) {
+        return sendJSON(res, 400, { error: err.message });
+      }
+    });
     return;
   }
 

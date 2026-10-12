@@ -150,6 +150,12 @@
             <span class="text-xs font-semibold text-emerald-400 font-mono">300 Mbps (Ether 1)</span>
           </div>
 
+          <!-- Pantau Klien WiFi (Menu Utama Klien) -->
+          <button onclick="switchTab('clients')" class="px-3 py-2 text-xs font-semibold rounded-xl bg-indigo-500/10 hover:bg-indigo-500/20 text-indigo-300 border border-indigo-500/40 transition flex items-center gap-1.5 shadow-sm" title="Pantau Klien & Putus Koneksi">
+            <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+            👥 Pantau Klien (<span id="headerClientCount">75</span>)
+          </button>
+
           <!-- Akses Online HP (100% Otomatis) -->
           <button onclick="openOnlineModal()" class="px-3 py-2 text-xs font-semibold rounded-xl bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 border border-emerald-500/40 transition flex items-center gap-1.5 shadow-sm">
             <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
@@ -191,6 +197,10 @@
 
         <!-- Mobile Header Actions -->
         <div class="flex items-center gap-1.5 md:hidden">
+          <button onclick="switchTab('clients')" class="p-2 text-xs rounded-lg bg-indigo-500/20 text-indigo-300 border border-indigo-500/40 relative" title="Pantau Klien WiFi">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
+            <span class="absolute -top-1 -right-1 w-2.5 h-2.5 bg-emerald-400 rounded-full animate-pulse"></span>
+          </button>
           <button onclick="openOnlineModal()" class="p-2 text-xs rounded-lg bg-emerald-500/10 text-emerald-400 border border-emerald-500/40" title="Akses Online HP">
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z"></path></svg>
           </button>
@@ -252,11 +262,15 @@
       <div class="grid grid-cols-3 sm:grid-cols-6 gap-2 mt-3 pt-3 border-t border-slate-800/80 text-[11px]" id="barLegend"></div>
     </div>
 
-    <!-- Navigation Tabs (4 Pill Style Tabs) -->
-    <div class="flex bg-slate-900/90 p-1 rounded-xl border border-slate-800 max-w-2xl mx-auto sm:mx-0 overflow-x-auto no-scrollbar">
+    <!-- Navigation Tabs (5 Pill Style Tabs) -->
+    <div class="flex bg-slate-900/90 p-1 rounded-xl border border-slate-800 max-w-3xl mx-auto sm:mx-0 overflow-x-auto no-scrollbar">
       <button onclick="switchTab('wifi-grid')" id="tab-wifi-grid" class="flex-1 min-w-[95px] py-2 text-xs font-semibold rounded-lg text-indigo-300 bg-indigo-600/20 border border-indigo-500/30 flex items-center justify-center gap-1.5 transition">
         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.111 16.404a5.5 5.5 0 017.778 0M12 20h.01m-7.08-7.071c3.904-3.905 10.236-3.905 14.141 0M1.394 9.393c5.857-5.857 15.355-5.857 21.213 0"></path></svg>
         <span>Jatah WiFi</span>
+      </button>
+      <button onclick="switchTab('clients')" id="tab-clients" class="flex-1 min-w-[125px] py-2 text-xs font-medium rounded-lg text-slate-400 hover:text-slate-200 flex items-center justify-center gap-1.5 transition">
+        <svg class="w-4 h-4 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
+        <span class="font-semibold text-emerald-300">Klien WiFi (<span id="tabClientCount">75</span>)</span>
       </button>
       <button onclick="switchTab('speedtest')" id="tab-speedtest" class="flex-1 min-w-[105px] py-2 text-xs font-medium rounded-lg text-slate-400 hover:text-slate-200 flex items-center justify-center gap-1.5 transition">
         <svg class="w-4 h-4 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
@@ -461,6 +475,141 @@
           <tbody id="antiConflictTableBody" class="divide-y divide-slate-800/60 bg-slate-900/40"></tbody>
         </table>
       </div>
+    </div>
+
+    <!-- TAB: KLIEN & PERANGKAT TERHUBUNG (MANAJEMEN REAL-TIME) -->
+    <div id="section-clients" class="hidden space-y-4 sm:space-y-5">
+
+      <!-- Header & Quick Controls Card -->
+      <div class="bg-[#111827]/90 border border-slate-800 rounded-2xl p-4 sm:p-6 shadow-xl backdrop-blur-sm">
+        <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4 border-b border-slate-800 pb-4">
+          <div>
+            <div class="flex items-center gap-2">
+              <span class="w-3 h-3 rounded-full bg-emerald-400 animate-pulse"></span>
+              <h3 class="text-base sm:text-lg font-bold text-white flex items-center gap-2">
+                Pantau Klien & Manajemen Perangkat WiFi
+                <span class="text-xs px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 font-mono font-normal">Real-Time</span>
+              </h3>
+            </div>
+            <p class="text-xs text-slate-400 mt-1 max-w-3xl">
+              Ketahui detail HP, Laptop, PC yang terkoneksi pada tiap WiFi (WiFi 1 s/d 6). Ambil keputusan seketika: 
+              <strong class="text-amber-400">Putus Koneksi (Kick)</strong> untuk restart sesi, atau 
+              <strong class="text-red-400">Blokir Akses (Blacklist Drop)</strong> untuk menutup akses internet.
+            </p>
+          </div>
+
+          <!-- Top Action Buttons -->
+          <div class="flex items-center flex-wrap gap-2">
+            <button onclick="refreshClientsData()" class="px-3 py-2 text-xs font-semibold rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 transition flex items-center gap-1.5 shadow-sm">
+              <svg id="refreshClientIcon" class="w-3.5 h-3.5 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
+              <span>Refresh Data</span>
+            </button>
+            <button onclick="kickAllGuests()" class="px-3 py-2 text-xs font-semibold rounded-xl bg-amber-950/40 hover:bg-amber-900/50 text-amber-300 border border-amber-800/40 transition flex items-center gap-1.5 shadow-sm" title="Putus semua perangkat di WiFi 6">
+              <svg class="w-3.5 h-3.5 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+              <span>Kick Semua Tamu (WiFi 6)</span>
+            </button>
+            <button onclick="filterBlockedTab()" class="px-3 py-2 text-xs font-semibold rounded-xl bg-red-950/40 hover:bg-red-900/50 text-red-300 border border-red-800/40 transition flex items-center gap-1.5 shadow-sm">
+              <svg class="w-3.5 h-3.5 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636"></path></svg>
+              <span>Daftar Blacklist (<span id="btnBlockedCount">0</span>)</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- 5 Metric Stat Cards -->
+        <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2.5 sm:gap-3.5 mt-4">
+          <div class="bg-slate-950/70 border border-slate-800 rounded-xl p-3 flex flex-col">
+            <span class="text-[10px] uppercase font-bold text-slate-400 tracking-wider">Total Klien Online</span>
+            <div class="flex items-baseline gap-1.5 mt-1">
+              <span class="text-xl sm:text-2xl font-black text-emerald-400 font-mono" id="statTotalClients">75</span>
+              <span class="text-[11px] text-slate-500 font-medium">Perangkat</span>
+            </div>
+            <span class="text-[10px] text-emerald-400/80 mt-1 flex items-center gap-1">
+              <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span> 100% Tersebar 6 WiFi
+            </span>
+          </div>
+
+          <div class="bg-slate-950/70 border border-slate-800 rounded-xl p-3 flex flex-col">
+            <span class="text-[10px] uppercase font-bold text-slate-400 tracking-wider">Smartphone / HP</span>
+            <div class="flex items-baseline gap-1.5 mt-1">
+              <span class="text-xl sm:text-2xl font-black text-blue-400 font-mono" id="statPhoneClients">51</span>
+              <span class="text-[11px] text-slate-500 font-medium">Unit</span>
+            </div>
+            <span class="text-[10px] text-slate-400 mt-1">Android & iOS Siswa/Guru</span>
+          </div>
+
+          <div class="bg-slate-950/70 border border-slate-800 rounded-xl p-3 flex flex-col">
+            <span class="text-[10px] uppercase font-bold text-slate-400 tracking-wider">Laptop & PC</span>
+            <div class="flex items-baseline gap-1.5 mt-1">
+              <span class="text-xl sm:text-2xl font-black text-purple-400 font-mono" id="statPcClients">24</span>
+              <span class="text-[11px] text-slate-500 font-medium">Unit</span>
+            </div>
+            <span class="text-[10px] text-slate-400 mt-1">Lab Komputer & Guru</span>
+          </div>
+
+          <div class="bg-slate-950/70 border border-slate-800 rounded-xl p-3 flex flex-col">
+            <span class="text-[10px] uppercase font-bold text-slate-400 tracking-wider">Trafik Klien Saat Ini</span>
+            <div class="flex items-baseline gap-1.5 mt-1">
+              <span class="text-xl sm:text-2xl font-black text-amber-400 font-mono" id="statTotalBandwidth">148.1</span>
+              <span class="text-[11px] text-slate-500 font-medium">Mbps</span>
+            </div>
+            <span class="text-[10px] text-slate-400 mt-1">Dari 300 Mbps Indibiz</span>
+          </div>
+
+          <div class="bg-slate-950/70 border border-slate-800 rounded-xl p-3 flex flex-col col-span-2 sm:col-span-1">
+            <span class="text-[10px] uppercase font-bold text-slate-400 tracking-wider">Perangkat Terblokir</span>
+            <div class="flex items-baseline gap-1.5 mt-1">
+              <span class="text-xl sm:text-2xl font-black text-red-400 font-mono" id="statBlockedClients">0</span>
+              <span class="text-[11px] text-slate-500 font-medium">Blacklist</span>
+            </div>
+            <span class="text-[10px] text-red-400/80 mt-1">Drop Firewall MikroTik</span>
+          </div>
+        </div>
+
+        <!-- WiFi Filter Tabs / Pills -->
+        <div class="mt-4 pt-4 border-t border-slate-800/80">
+          <div class="text-[11px] text-slate-400 font-semibold mb-2">Filter Berdasarkan Router WiFi:</div>
+          <div class="flex items-center gap-1.5 overflow-x-auto no-scrollbar pb-1" id="wifiFilterPillsContainer">
+            <!-- Populated via JS -->
+          </div>
+        </div>
+
+        <!-- Search Bar & Filters Row -->
+        <div class="mt-3.5 flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5">
+          <!-- Search Input -->
+          <div class="relative flex-1">
+            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-500">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+            </div>
+            <input type="text" id="clientSearchInput" oninput="handleClientSearch()" placeholder="Cari nama HP / Laptop / Siswa / IP (192.168.88.x) / MAC..." 
+              class="w-full bg-slate-950/90 border border-slate-800 rounded-xl pl-9 pr-3.5 py-2 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition">
+          </div>
+
+          <!-- Type Filter Dropdown -->
+          <div class="flex items-center gap-1.5">
+            <select id="clientTypeFilter" onchange="handleClientFilterChange()" class="bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-200 outline-none cursor-pointer focus:border-indigo-500">
+              <option value="all">Semua Jenis Perangkat</option>
+              <option value="phone">📱 Smartphone / HP</option>
+              <option value="laptop">💻 Laptop</option>
+              <option value="desktop">🖥️ Komputer PC</option>
+              <option value="printer">🖨️ Printer WiFi</option>
+            </select>
+
+            <!-- Status Filter Dropdown -->
+            <select id="clientStatusFilter" onchange="handleClientFilterChange()" class="bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-200 outline-none cursor-pointer focus:border-indigo-500">
+              <option value="all">Semua Status</option>
+              <option value="active">🟢 Online Normal</option>
+              <option value="blocked">🔴 DIBLOKIR</option>
+              <option value="kicked">⚡ Sesi Terputus</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <!-- Device Cards Container -->
+      <div id="clientCardsGrid" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3.5 sm:gap-4">
+        <!-- Rendered by JS -->
+      </div>
+
     </div>
 
   </main>
@@ -723,6 +872,7 @@
         <button onclick="switchInspectTab('all')" id="tabInspectAll" class="px-3 py-1.5 rounded-lg bg-indigo-600 text-white font-medium flex-shrink-0">Semua Script</button>
         <button onclick="switchInspectTab('queues')" id="tabInspectQueues" class="px-3 py-1.5 rounded-lg bg-slate-800 text-slate-300 hover:text-white flex-shrink-0">Bandwidth (Queues)</button>
         <button onclick="switchInspectTab('leases')" id="tabInspectLeases" class="px-3 py-1.5 rounded-lg bg-slate-800 text-slate-300 hover:text-white flex-shrink-0">Anti-Konflik IP</button>
+        <button onclick="switchInspectTab('firewall')" id="tabInspectFirewall" class="px-3 py-1.5 rounded-lg bg-slate-800 text-slate-300 hover:text-white flex-shrink-0">Blokir Klien (Firewall)</button>
         <button onclick="switchInspectTab('network')" id="tabInspectNetwork" class="px-3 py-1.5 rounded-lg bg-slate-800 text-slate-300 hover:text-white flex-shrink-0">Internet & Bridge</button>
       </div>
 
@@ -740,6 +890,147 @@
           Unduh File .rsc
         </button>
         <button onclick="closeInspectModal()" class="px-4 py-2 text-xs rounded-xl text-slate-300 hover:bg-slate-800 transition">Tutup</button>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- MODAL: GANTI NAMA / LABEL PERANGKAT -->
+  <div id="renameClientModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 hidden flex items-end sm:items-center justify-center p-0 sm:p-4">
+    <div class="bg-slate-900 border border-slate-800 rounded-t-2xl sm:rounded-2xl max-w-md w-full p-5 sm:p-6 shadow-2xl space-y-4">
+      <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+        <div class="flex items-center gap-2">
+          <div class="w-8 h-8 rounded-lg bg-indigo-500/20 text-indigo-400 flex items-center justify-center">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
+          </div>
+          <div>
+            <h3 class="font-bold text-white text-sm sm:text-base">Beri Nama / Catatan Perangkat</h3>
+            <p class="text-[11px] text-slate-400">Tandai siapa pemilik HP / Laptop ini agar mudah dipantau</p>
+          </div>
+        </div>
+        <button onclick="closeRenameClientModal()" class="text-slate-400 hover:text-white text-xl p-1 font-bold">&times;</button>
+      </div>
+
+      <div class="bg-slate-950 p-3 rounded-xl border border-slate-800 text-xs space-y-1">
+        <div class="flex justify-between text-slate-400"><span>Nama Sistem (DHCP):</span> <strong class="text-white font-mono" id="renameClientHostname">Device</strong></div>
+        <div class="flex justify-between text-slate-400"><span>IP Address:</span> <span class="text-indigo-400 font-mono" id="renameClientIp">192.168.88.x</span></div>
+        <div class="flex justify-between text-slate-400"><span>MAC Address:</span> <span class="text-slate-300 font-mono" id="renameClientMac">XX:XX:XX:XX:XX:XX</span></div>
+      </div>
+
+      <div>
+        <label class="block text-xs font-semibold text-slate-300 mb-1.5">Nama / Label Pemilik (Contoh: "HP Pak Kepsek" atau "Siswa X-A"):</label>
+        <input type="text" id="renameClientInput" placeholder="Masukkan nama pemilik..." 
+          class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3.5 py-2.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500">
+      </div>
+
+      <div class="flex items-center justify-end gap-2 pt-2 border-t border-slate-800">
+        <button onclick="closeRenameClientModal()" class="px-4 py-2 text-xs rounded-xl text-slate-300 hover:bg-slate-800 transition">Batal</button>
+        <button onclick="saveClientCustomName()" class="px-4 py-2 text-xs font-semibold rounded-xl bg-gradient-to-r from-indigo-500 to-blue-600 hover:from-indigo-600 hover:to-blue-700 text-white shadow-lg transition">Simpan Nama</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: DETAIL KLIEN & SCRIPT ROUTEROS -->
+  <div id="clientDetailModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 hidden flex items-end sm:items-center justify-center p-0 sm:p-4">
+    <div class="bg-slate-900 border border-slate-800 rounded-t-2xl sm:rounded-2xl max-w-xl w-full p-5 sm:p-6 shadow-2xl space-y-4 max-h-[92vh] overflow-y-auto">
+      
+      <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+        <div class="flex items-center gap-2.5">
+          <div class="w-9 h-9 rounded-xl bg-indigo-500/20 text-indigo-400 flex items-center justify-center text-lg" id="detailDeviceIcon">
+            📱
+          </div>
+          <div>
+            <h3 class="font-bold text-white text-sm sm:text-base" id="detailDeviceTitle">Detail Perangkat Klien</h3>
+            <p class="text-[11px] text-slate-400" id="detailDeviceSubtitle">SMAN 1 Belitang • MikroTik hEX E50UG</p>
+          </div>
+        </div>
+        <button onclick="closeClientDetailModal()" class="text-slate-400 hover:text-white text-xl p-1 font-bold">&times;</button>
+      </div>
+
+      <!-- Detail Grid -->
+      <div class="bg-slate-950 p-3.5 rounded-xl border border-slate-800 grid grid-cols-2 gap-2 text-xs">
+        <div>
+          <span class="text-slate-500 block text-[10px] uppercase font-bold">Label Admin</span>
+          <span class="text-white font-semibold text-xs truncate block" id="detailCustomName">-</span>
+        </div>
+        <div>
+          <span class="text-slate-500 block text-[10px] uppercase font-bold">Hostname Asli</span>
+          <span class="text-slate-300 font-mono text-xs truncate block" id="detailHostname">-</span>
+        </div>
+        <div>
+          <span class="text-slate-500 block text-[10px] uppercase font-bold">IP Address</span>
+          <span class="text-indigo-400 font-mono font-bold text-xs" id="detailIp">-</span>
+        </div>
+        <div>
+          <span class="text-slate-500 block text-[10px] uppercase font-bold">MAC Address</span>
+          <span class="text-slate-300 font-mono text-xs" id="detailMac">-</span>
+        </div>
+        <div>
+          <span class="text-slate-500 block text-[10px] uppercase font-bold">Terhubung Ke</span>
+          <span class="text-emerald-400 font-medium text-xs truncate block" id="detailWifiName">-</span>
+        </div>
+        <div>
+          <span class="text-slate-500 block text-[10px] uppercase font-bold">Status Koneksi</span>
+          <span id="detailStatusBadge">-</span>
+        </div>
+      </div>
+
+      <!-- Action Commands for RouterOS CLI -->
+      <div class="space-y-3">
+        <div>
+          <div class="flex items-center justify-between text-xs mb-1">
+            <span class="font-bold text-amber-400 flex items-center gap-1">
+              ⚡ Perintah MikroTik Putus Koneksi (Kick):
+            </span>
+            <button onclick="copyDetailKickCommand()" class="text-[10px] text-indigo-400 hover:underline">📋 Salin Perintah</button>
+          </div>
+          <pre id="detailKickCode" class="bg-slate-950 p-2.5 rounded-xl border border-slate-800 text-[10.5px] font-mono text-amber-300 overflow-x-auto whitespace-pre-wrap select-all"></pre>
+        </div>
+
+        <div>
+          <div class="flex items-center justify-between text-xs mb-1">
+            <span class="font-bold text-red-400 flex items-center gap-1">
+              🚫 Perintah MikroTik Blokir Total (Drop Firewall):
+            </span>
+            <button onclick="copyDetailBlockCommand()" class="text-[10px] text-indigo-400 hover:underline">📋 Salin Perintah</button>
+          </div>
+          <pre id="detailBlockCode" class="bg-slate-950 p-2.5 rounded-xl border border-slate-800 text-[10.5px] font-mono text-red-300 overflow-x-auto whitespace-pre-wrap select-all"></pre>
+        </div>
+      </div>
+
+      <div class="flex items-center justify-between pt-2 border-t border-slate-800">
+        <div id="detailActionButtons" class="flex items-center gap-2">
+          <!-- Populated by JS -->
+        </div>
+        <button onclick="closeClientDetailModal()" class="px-4 py-2 text-xs rounded-xl text-slate-300 hover:bg-slate-800 transition">Tutup</button>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- MODAL: DAFTAR HITAM / PERANGKAT TERBLOKIR -->
+  <div id="blockedListModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 hidden flex items-end sm:items-center justify-center p-0 sm:p-4">
+    <div class="bg-slate-900 border border-slate-800 rounded-t-2xl sm:rounded-2xl max-w-2xl w-full p-5 sm:p-6 shadow-2xl space-y-4 max-h-[92vh] overflow-y-auto">
+      
+      <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+        <div class="flex items-center gap-2.5">
+          <div class="w-8 h-8 rounded-lg bg-red-500/20 text-red-400 flex items-center justify-center border border-red-500/30">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636"></path></svg>
+          </div>
+          <div>
+            <h3 class="font-bold text-white text-sm sm:text-base">Daftar Hitam Perangkat Terblokir (Firewall Drop)</h3>
+            <p class="text-[11px] text-slate-400">Seluruh perangkat di daftar ini tidak dapat mengakses internet sama sekali</p>
+          </div>
+        </div>
+        <button onclick="closeBlockedListModal()" class="text-slate-400 hover:text-white text-xl p-1 font-bold">&times;</button>
+      </div>
+
+      <div id="blockedListContent" class="space-y-2">
+        <!-- Rendered by JS -->
+      </div>
+
+      <div class="flex items-center justify-end pt-2 border-t border-slate-800">
+        <button onclick="closeBlockedListModal()" class="px-4 py-2 text-xs rounded-xl text-slate-300 hover:bg-slate-800 transition">Tutup</button>
       </div>
 
     </div>
@@ -831,7 +1122,7 @@
     }
 
     function switchInspectTab(type) {
-      const tabs = ['all', 'queues', 'leases', 'network'];
+      const tabs = ['all', 'queues', 'leases', 'firewall', 'network'];
       tabs.forEach(t => {
         const el = document.getElementById('tabInspect' + t.charAt(0).toUpperCase() + t.slice(1));
         if (el) {
@@ -860,6 +1151,22 @@
           l += `/ip dhcp-server lease add address=${w.ip} comment="${cleanName}"\n`;
         });
         codeBox.innerText = l;
+      } else if (type === 'firewall') {
+        let f = `# --- FIREWALL FILTER RULES (BLOKIR PERANGKAT / BLACKLIST) ---\n`;
+        f += `/ip firewall filter add chain=forward src-address-list=BLOCKED_CLIENTS action=drop comment="DROP_BLOCKED_CLIENTS"\n\n`;
+        const blocked = (typeof clientsData !== 'undefined') ? clientsData.filter(c => c.isBlocked || c.status === 'blocked') : [];
+        if (blocked.length === 0) {
+          f += `# Saat ini belum ada perangkat yang diblokir.\n`;
+          f += `# Contoh saat Anda memblokir suatu perangkat dari dashboard:\n`;
+          f += `# /ip firewall address-list add list=BLOCKED_CLIENTS address=192.168.88.105 comment="Blocked by Admin"\n`;
+          f += `# /ip firewall filter add chain=forward src-mac-address=8C:AA:B5:11:01:05 action=drop comment="BLOCKED_BY_ADMIN"\n`;
+        } else {
+          blocked.forEach(c => {
+            f += `/ip firewall address-list add list=BLOCKED_CLIENTS address=${c.ip} comment="Blocked: ${c.customName || c.hostname}"\n`;
+            f += `/ip firewall filter add chain=forward src-mac-address=${c.mac} action=drop comment="BLOCKED_BY_ADMIN"\n`;
+          });
+        }
+        codeBox.innerText = f;
       } else if (type === 'network') {
         let n = `# --- BRIDGE PORT 2-5 KE SWITCH TL-SG1016D ---\n`;
         n += `/interface bridge add name=bridge-LAN comment="Bridge Switch Hub SMANSA"\n`;
@@ -903,6 +1210,8 @@
         const cleanName = w.name.replace(/[^a-zA-Z0-9_-]/g, '_');
         s += `/queue simple add name="${cleanName}" target=${w.ip}/32 max-limit=${w.upload}M/${w.download}M comment="SMANSA Bandwidth"\n`;
       });
+      s += `\n# 5. Firewall Filter: Drop Perangkat Terblokir (Blacklist)\n`;
+      s += `/ip firewall filter add chain=forward src-address-list=BLOCKED_CLIENTS action=drop comment="DROP_BLOCKED_CLIENTS"\n`;
       return s;
     }
 
@@ -966,7 +1275,7 @@
           </div>
 
           <!-- Live Speed & Quick Speedtest Button -->
-          <div class="bg-slate-950/80 p-2 rounded-xl border border-slate-800/80 mb-3 flex items-center justify-between text-[11px]">
+          <div class="bg-slate-950/80 p-2 rounded-xl border border-slate-800/80 mb-2 flex items-center justify-between text-[11px]">
             <span class="text-slate-400 flex items-center gap-1.5">
               <span class="w-2 h-2 rounded-full ${item.active ? 'bg-emerald-400 animate-pulse' : 'bg-slate-600'}"></span>
               Live: <strong class="text-slate-200 font-mono">${item.active ? item.trafficNow + ' Mbps' : '0'}</strong>
@@ -974,6 +1283,17 @@
             <button onclick="openSpeedtestFor(${item.id})" class="px-2 py-0.5 rounded-lg bg-amber-500/15 hover:bg-amber-500/25 text-amber-300 border border-amber-500/30 text-[10px] font-semibold flex items-center gap-1 transition">
               <svg class="w-3 h-3 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
               Tes Speed
+            </button>
+          </div>
+
+          <!-- Client Count & Quick Kelola Klien -->
+          <div class="bg-indigo-950/40 border border-indigo-500/25 rounded-xl p-2 mb-3 flex items-center justify-between text-[11px]">
+            <span class="text-indigo-200 flex items-center gap-1.5 font-medium">
+              <svg class="w-3.5 h-3.5 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
+              <span><strong>${getClientCountForWifi(item.id)}</strong> Perangkat Konek</span>
+            </span>
+            <button onclick="filterAndOpenClients(${item.id})" class="px-2 py-0.5 rounded-lg bg-indigo-500/20 hover:bg-indigo-500/30 text-indigo-300 border border-indigo-500/40 text-[10px] font-bold flex items-center gap-1 transition">
+              Kelola Klien ➔
             </button>
           </div>
 
@@ -1194,7 +1514,7 @@
 
     // Tabs Switcher
     function switchTab(tabId) {
-      ['wifi-grid', 'speedtest', 'topology', 'anti-conflict'].forEach(id => {
+      ['wifi-grid', 'clients', 'speedtest', 'topology', 'anti-conflict'].forEach(id => {
         const sec = document.getElementById(`section-${id}`);
         if (sec) sec.classList.toggle('hidden', id !== tabId);
         
@@ -1207,6 +1527,9 @@
           }
         }
       });
+      if (tabId === 'clients') {
+        renderClients();
+      }
     }
 
     // ==========================================
@@ -1661,9 +1984,694 @@
       }, 3500);
     }
 
+    // ==========================================
+    // MENU UTAMA: MANAJEMEN KLIEN & PERANGKAT WIFI
+    // ==========================================
+    const DEFAULT_SMANSA_CLIENTS = [
+      // WiFi 1: Ruang Guru & TU (14 Perangkat)
+      { id: "c101", wifiId: 1, wifiName: "WiFi 1 (Ruang Guru & TU)", hostname: "Samsung-Galaxy-S23", customName: "HP Pak Kepsek (Bagus)", ip: "192.168.88.101", mac: "8C:AA:B5:11:01:01", vendor: "Samsung Electronics", deviceType: "phone", downloadSpeed: 4.8, uploadSpeed: 1.2, uptime: "45 menit", status: "active", isBlocked: false },
+      { id: "c102", wifiId: 1, wifiName: "WiFi 1 (Ruang Guru & TU)", hostname: "iPhone-14-Pro", customName: "HP Bu Wakasek Kurikulum", ip: "192.168.88.102", mac: "F0:18:98:11:01:02", vendor: "Apple Inc.", deviceType: "phone", downloadSpeed: 3.2, uploadSpeed: 0.9, uptime: "1 jam 12 mnt", status: "active", isBlocked: false },
+      { id: "c103", wifiId: 1, wifiName: "WiFi 1 (Ruang Guru & TU)", hostname: "Laptop-Lenovo-ThinkPad", customName: "Laptop TU Administrasi", ip: "192.168.88.103", mac: "54:EE:75:11:01:03", vendor: "Lenovo", deviceType: "laptop", downloadSpeed: 6.5, uploadSpeed: 2.1, uptime: "2 jam 40 mnt", status: "active", isBlocked: false },
+      { id: "c104", wifiId: 1, wifiName: "WiFi 1 (Ruang Guru & TU)", hostname: "MacBook-Air-M2", customName: "Laptop Bu Siti (Fisika)", ip: "192.168.88.104", mac: "3C:06:30:11:01:04", vendor: "Apple Inc.", deviceType: "laptop", downloadSpeed: 2.7, uploadSpeed: 0.8, uptime: "35 menit", status: "active", isBlocked: false },
+      { id: "c105", wifiId: 1, wifiName: "WiFi 1 (Ruang Guru & TU)", hostname: "OPPO-Reno-10", customName: "HP Pak Guru Matematika", ip: "192.168.88.105", mac: "94:65:2D:11:01:05", vendor: "OPPO Mobile", deviceType: "phone", downloadSpeed: 1.8, uploadSpeed: 0.5, uptime: "50 menit", status: "active", isBlocked: false },
+      { id: "c106", wifiId: 1, wifiName: "WiFi 1 (Ruang Guru & TU)", hostname: "Vivo-V27", customName: "HP Bu Guru Kimia", ip: "192.168.88.106", mac: "28:6C:07:11:01:06", vendor: "Vivo Mobile", deviceType: "phone", downloadSpeed: 2.1, uploadSpeed: 0.4, uptime: "15 menit", status: "active", isBlocked: false },
+      { id: "c107", wifiId: 1, wifiName: "WiFi 1 (Ruang Guru & TU)", hostname: "Laptop-HP-ProBook", customName: "Laptop TU Dapodik & Nilai", ip: "192.168.88.107", mac: "A4:5D:36:11:01:07", vendor: "HP Inc.", deviceType: "laptop", downloadSpeed: 5.1, uploadSpeed: 1.8, uptime: "3 jam 10 mnt", status: "active", isBlocked: false },
+      { id: "c108", wifiId: 1, wifiName: "WiFi 1 (Ruang Guru & TU)", hostname: "Xiaomi-13T", customName: "HP Pak Guru Penjas", ip: "192.168.88.108", mac: "40:4E:36:11:01:08", vendor: "Xiaomi", deviceType: "phone", downloadSpeed: 1.4, uploadSpeed: 0.3, uptime: "1 jam 05 mnt", status: "active", isBlocked: false },
+      { id: "c109", wifiId: 1, wifiName: "WiFi 1 (Ruang Guru & TU)", hostname: "Samsung-Galaxy-A54", customName: "HP Guru BP / BK", ip: "192.168.88.109", mac: "E8:50:8B:11:01:09", vendor: "Samsung", deviceType: "phone", downloadSpeed: 2.0, uploadSpeed: 0.6, uptime: "28 menit", status: "active", isBlocked: false },
+      { id: "c110", wifiId: 1, wifiName: "WiFi 1 (Ruang Guru & TU)", hostname: "Printer-Epson-L3210", customName: "Printer Nirkabel Guru & TU", ip: "192.168.88.110", mac: "00:26:AB:11:01:10", vendor: "Epson", deviceType: "printer", downloadSpeed: 0.1, uploadSpeed: 0.1, uptime: "4 jam 22 mnt", status: "active", isBlocked: false },
+      { id: "c111", wifiId: 1, wifiName: "WiFi 1 (Ruang Guru & TU)", hostname: "iPad-Gen-9", customName: "iPad Pembelajaran IPA", ip: "192.168.88.111", mac: "AC:FD:CE:11:01:11", vendor: "Apple Inc.", deviceType: "phone", downloadSpeed: 3.5, uploadSpeed: 0.7, uptime: "55 menit", status: "active", isBlocked: false },
+      { id: "c112", wifiId: 1, wifiName: "WiFi 1 (Ruang Guru & TU)", hostname: "Realme-11-Pro", customName: "HP Staf Administrasi", ip: "192.168.88.112", mac: "70:89:CC:11:01:12", vendor: "Realme", deviceType: "phone", downloadSpeed: 1.9, uploadSpeed: 0.5, uptime: "18 menit", status: "active", isBlocked: false },
+      { id: "c113", wifiId: 1, wifiName: "WiFi 1 (Ruang Guru & TU)", hostname: "Infinix-Zero-30", customName: "HP Guru Bahasa Inggris", ip: "192.168.88.113", mac: "B4:CD:27:11:01:13", vendor: "Infinix", deviceType: "phone", downloadSpeed: 2.3, uploadSpeed: 0.6, uptime: "42 menit", status: "active", isBlocked: false },
+      { id: "c114", wifiId: 1, wifiName: "WiFi 1 (Ruang Guru & TU)", hostname: "Laptop-Asus-Vivobook", customName: "Laptop Pak Guru Seni & Budaya", ip: "192.168.88.114", mac: "80:FA:5B:11:01:14", vendor: "Asus", deviceType: "laptop", downloadSpeed: 3.8, uploadSpeed: 1.1, uptime: "1 jam 30 mnt", status: "active", isBlocked: false },
+
+      // WiFi 2: Lab Komputer (28 Perangkat)
+      { id: "c201", wifiId: 2, wifiName: "WiFi 2 (Lab Komputer)", hostname: "PC-LAB-KOMP-01", customName: "PC Client Lab 01 (Depan)", ip: "192.168.88.121", mac: "00:1E:67:12:02:01", vendor: "Intel Corp.", deviceType: "desktop", downloadSpeed: 3.4, uploadSpeed: 1.2, uptime: "2 jam 15 mnt", status: "active", isBlocked: false },
+      { id: "c202", wifiId: 2, wifiName: "WiFi 2 (Lab Komputer)", hostname: "PC-LAB-KOMP-02", customName: "PC Client Lab 02", ip: "192.168.88.122", mac: "00:1E:67:12:02:02", vendor: "Intel Corp.", deviceType: "desktop", downloadSpeed: 3.1, uploadSpeed: 1.0, uptime: "2 jam 15 mnt", status: "active", isBlocked: false },
+      { id: "c203", wifiId: 2, wifiName: "WiFi 2 (Lab Komputer)", hostname: "PC-LAB-KOMP-03", customName: "PC Client Lab 03", ip: "192.168.88.123", mac: "00:1E:67:12:02:03", vendor: "Intel Corp.", deviceType: "desktop", downloadSpeed: 2.8, uploadSpeed: 0.9, uptime: "2 jam 15 mnt", status: "active", isBlocked: false },
+      { id: "c204", wifiId: 2, wifiName: "WiFi 2 (Lab Komputer)", hostname: "PC-LAB-KOMP-04", customName: "PC Client Lab 04", ip: "192.168.88.124", mac: "00:1E:67:12:02:04", vendor: "Intel Corp.", deviceType: "desktop", downloadSpeed: 3.5, uploadSpeed: 1.1, uptime: "2 jam 15 mnt", status: "active", isBlocked: false },
+      { id: "c205", wifiId: 2, wifiName: "WiFi 2 (Lab Komputer)", hostname: "PC-LAB-KOMP-05", customName: "PC Client Lab 05", ip: "192.168.88.125", mac: "00:1E:67:12:02:05", vendor: "Intel Corp.", deviceType: "desktop", downloadSpeed: 4.1, uploadSpeed: 1.3, uptime: "2 jam 15 mnt", status: "active", isBlocked: false },
+      { id: "c206", wifiId: 2, wifiName: "WiFi 2 (Lab Komputer)", hostname: "PC-LAB-KOMP-06", customName: "PC Client Lab 06", ip: "192.168.88.126", mac: "00:1E:67:12:02:06", vendor: "Intel Corp.", deviceType: "desktop", downloadSpeed: 2.9, uploadSpeed: 0.8, uptime: "2 jam 15 mnt", status: "active", isBlocked: false },
+      { id: "c207", wifiId: 2, wifiName: "WiFi 2 (Lab Komputer)", hostname: "PC-LAB-KOMP-07", customName: "PC Client Lab 07", ip: "192.168.88.127", mac: "00:1E:67:12:02:07", vendor: "Intel Corp.", deviceType: "desktop", downloadSpeed: 3.7, uploadSpeed: 1.0, uptime: "2 jam 15 mnt", status: "active", isBlocked: false },
+      { id: "c208", wifiId: 2, wifiName: "WiFi 2 (Lab Komputer)", hostname: "PC-LAB-KOMP-08", customName: "PC Client Lab 08", ip: "192.168.88.128", mac: "00:1E:67:12:02:08", vendor: "Intel Corp.", deviceType: "desktop", downloadSpeed: 3.0, uploadSpeed: 0.9, uptime: "2 jam 15 mnt", status: "active", isBlocked: false },
+      { id: "c209", wifiId: 2, wifiName: "WiFi 2 (Lab Komputer)", hostname: "PC-LAB-KOMP-09", customName: "PC Client Lab 09", ip: "192.168.88.129", mac: "00:1E:67:12:02:09", vendor: "Intel Corp.", deviceType: "desktop", downloadSpeed: 2.5, uploadSpeed: 0.7, uptime: "2 jam 15 mnt", status: "active", isBlocked: false },
+      { id: "c210", wifiId: 2, wifiName: "WiFi 2 (Lab Komputer)", hostname: "PC-LAB-KOMP-10", customName: "PC Client Lab 10", ip: "192.168.88.130", mac: "00:1E:67:12:02:10", vendor: "Intel Corp.", deviceType: "desktop", downloadSpeed: 3.6, uploadSpeed: 1.2, uptime: "2 jam 15 mnt", status: "active", isBlocked: false },
+      { id: "c211", wifiId: 2, wifiName: "WiFi 2 (Lab Komputer)", hostname: "PC-LAB-KOMP-11", customName: "PC Client Lab 11", ip: "192.168.88.131", mac: "00:1E:67:12:02:11", vendor: "Intel Corp.", deviceType: "desktop", downloadSpeed: 2.8, uploadSpeed: 0.9, uptime: "2 jam 15 mnt", status: "active", isBlocked: false },
+      { id: "c212", wifiId: 2, wifiName: "WiFi 2 (Lab Komputer)", hostname: "PC-LAB-KOMP-12", customName: "PC Client Lab 12", ip: "192.168.88.132", mac: "00:1E:67:12:02:12", vendor: "Intel Corp.", deviceType: "desktop", downloadSpeed: 3.2, uploadSpeed: 1.0, uptime: "2 jam 15 mnt", status: "active", isBlocked: false },
+      { id: "c213", wifiId: 2, wifiName: "WiFi 2 (Lab Komputer)", hostname: "PC-LAB-KOMP-13", customName: "PC Client Lab 13", ip: "192.168.88.133", mac: "00:1E:67:12:02:13", vendor: "Intel Corp.", deviceType: "desktop", downloadSpeed: 2.7, uploadSpeed: 0.8, uptime: "2 jam 15 mnt", status: "active", isBlocked: false },
+      { id: "c214", wifiId: 2, wifiName: "WiFi 2 (Lab Komputer)", hostname: "PC-LAB-KOMP-14", customName: "PC Client Lab 14", ip: "192.168.88.134", mac: "00:1E:67:12:02:14", vendor: "Intel Corp.", deviceType: "desktop", downloadSpeed: 3.4, uploadSpeed: 1.1, uptime: "2 jam 15 mnt", status: "active", isBlocked: false },
+      { id: "c215", wifiId: 2, wifiName: "WiFi 2 (Lab Komputer)", hostname: "PC-LAB-KOMP-15", customName: "PC Client Lab 15", ip: "192.168.88.135", mac: "00:1E:67:12:02:15", vendor: "Intel Corp.", deviceType: "desktop", downloadSpeed: 3.0, uploadSpeed: 0.9, uptime: "2 jam 15 mnt", status: "active", isBlocked: false },
+      { id: "c216", wifiId: 2, wifiName: "WiFi 2 (Lab Komputer)", hostname: "PC-LAB-KOMP-16", customName: "PC Client Lab 16", ip: "192.168.88.136", mac: "00:1E:67:12:02:16", vendor: "Intel Corp.", deviceType: "desktop", downloadSpeed: 3.9, uploadSpeed: 1.2, uptime: "2 jam 15 mnt", status: "active", isBlocked: false },
+      { id: "c217", wifiId: 2, wifiName: "WiFi 2 (Lab Komputer)", hostname: "PC-LAB-KOMP-17", customName: "PC Client Lab 17", ip: "192.168.88.137", mac: "00:1E:67:12:02:17", vendor: "Intel Corp.", deviceType: "desktop", downloadSpeed: 2.4, uploadSpeed: 0.7, uptime: "2 jam 15 mnt", status: "active", isBlocked: false },
+      { id: "c218", wifiId: 2, wifiName: "WiFi 2 (Lab Komputer)", hostname: "PC-LAB-KOMP-18", customName: "PC Client Lab 18", ip: "192.168.88.138", mac: "00:1E:67:12:02:18", vendor: "Intel Corp.", deviceType: "desktop", downloadSpeed: 3.3, uploadSpeed: 1.0, uptime: "2 jam 15 mnt", status: "active", isBlocked: false },
+      { id: "c219", wifiId: 2, wifiName: "WiFi 2 (Lab Komputer)", hostname: "PC-LAB-KOMP-19", customName: "PC Client Lab 19", ip: "192.168.88.139", mac: "00:1E:67:12:02:19", vendor: "Intel Corp.", deviceType: "desktop", downloadSpeed: 2.9, uploadSpeed: 0.9, uptime: "2 jam 15 mnt", status: "active", isBlocked: false },
+      { id: "c220", wifiId: 2, wifiName: "WiFi 2 (Lab Komputer)", hostname: "PC-LAB-KOMP-20", customName: "PC Client Lab 20 (Pojok)", ip: "192.168.88.140", mac: "00:1E:67:12:02:20", vendor: "Intel Corp.", deviceType: "desktop", downloadSpeed: 3.1, uploadSpeed: 1.0, uptime: "2 jam 15 mnt", status: "active", isBlocked: false },
+      { id: "c221", wifiId: 2, wifiName: "WiFi 2 (Lab Komputer)", hostname: "Server-Mini-CBT", customName: "Server Simulasi CBT Lab Komputer", ip: "192.168.88.141", mac: "74:86:7A:12:02:21", vendor: "Dell Inc.", deviceType: "desktop", downloadSpeed: 8.5, uploadSpeed: 4.2, uptime: "5 jam 40 mnt", status: "active", isBlocked: false },
+      { id: "c222", wifiId: 2, wifiName: "WiFi 2 (Lab Komputer)", hostname: "Laptop-Instruktur-Lab", customName: "Laptop Guru TIK / Operator", ip: "192.168.88.142", mac: "38:BA:F8:12:02:22", vendor: "Lenovo", deviceType: "laptop", downloadSpeed: 5.4, uploadSpeed: 2.0, uptime: "2 jam 30 mnt", status: "active", isBlocked: false },
+      { id: "c223", wifiId: 2, wifiName: "WiFi 2 (Lab Komputer)", hostname: "PC-Master-Proyektor", customName: "PC Proyektor Presentasi Lab", ip: "192.168.88.143", mac: "BC:54:36:12:02:23", vendor: "Asus", deviceType: "desktop", downloadSpeed: 2.2, uploadSpeed: 0.6, uptime: "1 jam 50 mnt", status: "active", isBlocked: false },
+      { id: "c224", wifiId: 2, wifiName: "WiFi 2 (Lab Komputer)", hostname: "Redmi-Note-12", customName: "HP Siswa Asisten Lab", ip: "192.168.88.144", mac: "64:DB:8B:12:02:24", vendor: "Xiaomi", deviceType: "phone", downloadSpeed: 1.6, uploadSpeed: 0.4, uptime: "40 menit", status: "active", isBlocked: false },
+      { id: "c225", wifiId: 2, wifiName: "WiFi 2 (Lab Komputer)", hostname: "Samsung-Galaxy-Tab-A8", customName: "Tablet Modul Praktikum Lab", ip: "192.168.88.145", mac: "50:77:05:12:02:25", vendor: "Samsung", deviceType: "phone", downloadSpeed: 2.4, uploadSpeed: 0.5, uptime: "1 jam 10 mnt", status: "active", isBlocked: false },
+      { id: "c226", wifiId: 2, wifiName: "WiFi 2 (Lab Komputer)", hostname: "Laptop-Asus-TUF", customName: "Laptop Siswa Praktik Multimedia", ip: "192.168.88.146", mac: "1C:69:7A:12:02:26", vendor: "Asus", deviceType: "laptop", downloadSpeed: 6.8, uploadSpeed: 2.5, uptime: "1 jam 45 mnt", status: "active", isBlocked: false },
+      { id: "c227", wifiId: 2, wifiName: "WiFi 2 (Lab Komputer)", hostname: "Printer-Canon-G2010", customName: "Printer Jaringan Lab Komputer", ip: "192.168.88.147", mac: "18:0D:2C:12:02:27", vendor: "Canon", deviceType: "printer", downloadSpeed: 0.1, uploadSpeed: 0.1, uptime: "3 jam 50 mnt", status: "active", isBlocked: false },
+      { id: "c228", wifiId: 2, wifiName: "WiFi 2 (Lab Komputer)", hostname: "Laptop-Lenovo-Yoga", customName: "Laptop Asisten Instruktur", ip: "192.168.88.148", mac: "AC:19:8E:12:02:28", vendor: "Lenovo", deviceType: "laptop", downloadSpeed: 3.9, uploadSpeed: 1.2, uptime: "55 menit", status: "active", isBlocked: false },
+
+      // WiFi 3: Perpustakaan (8 Perangkat)
+      { id: "c301", wifiId: 3, wifiName: "WiFi 3 (Perpustakaan)", hostname: "PC-Katalog-Perpus", customName: "Komputer OPAC E-Katalog Perpus", ip: "192.168.88.151", mac: "48:2C:A0:13:03:01", vendor: "HP Inc.", deviceType: "desktop", downloadSpeed: 1.5, uploadSpeed: 0.4, uptime: "3 jam 20 mnt", status: "active", isBlocked: false },
+      { id: "c302", wifiId: 3, wifiName: "WiFi 3 (Perpustakaan)", hostname: "Laptop-Penjaga-Perpus", customName: "Laptop Petugas Sirkulasi Buku", ip: "192.168.88.152", mac: "90:FB:A6:13:03:02", vendor: "Acer Inc.", deviceType: "laptop", downloadSpeed: 2.2, uploadSpeed: 0.7, uptime: "2 jam 10 mnt", status: "active", isBlocked: false },
+      { id: "c303", wifiId: 3, wifiName: "WiFi 3 (Perpustakaan)", hostname: "Tablet-E-Perpus-01", customName: "Tablet Baca Buku Digital 1", ip: "192.168.88.153", mac: "7C:D1:C3:13:03:03", vendor: "Samsung", deviceType: "phone", downloadSpeed: 1.8, uploadSpeed: 0.3, uptime: "48 menit", status: "active", isBlocked: false },
+      { id: "c304", wifiId: 3, wifiName: "WiFi 3 (Perpustakaan)", hostname: "Tablet-E-Perpus-02", customName: "Tablet Baca Buku Digital 2", ip: "192.168.88.154", mac: "7C:D1:C3:13:03:04", vendor: "Samsung", deviceType: "phone", downloadSpeed: 1.2, uploadSpeed: 0.2, uptime: "35 menit", status: "active", isBlocked: false },
+      { id: "c305", wifiId: 3, wifiName: "WiFi 3 (Perpustakaan)", hostname: "Samsung-A14", customName: "HP Siswa Membaca (X-3)", ip: "192.168.88.155", mac: "4C:B9:EA:13:03:05", vendor: "Samsung", deviceType: "phone", downloadSpeed: 0.9, uploadSpeed: 0.2, uptime: "25 menit", status: "active", isBlocked: false },
+      { id: "c306", wifiId: 3, wifiName: "WiFi 3 (Perpustakaan)", hostname: "OPPO-A58", customName: "HP Siswa Belajar Mandiri (XI-2)", ip: "192.168.88.156", mac: "60:F6:73:13:03:06", vendor: "OPPO", deviceType: "phone", downloadSpeed: 1.1, uploadSpeed: 0.3, uptime: "50 menit", status: "active", isBlocked: false },
+      { id: "c307", wifiId: 3, wifiName: "WiFi 3 (Perpustakaan)", hostname: "Laptop-Acer-Aspire", customName: "Laptop Siswa Riset Makalah", ip: "192.168.88.157", mac: "00:24:D7:13:03:07", vendor: "Acer Inc.", deviceType: "laptop", downloadSpeed: 2.5, uploadSpeed: 0.8, uptime: "1 jam 15 mnt", status: "active", isBlocked: false },
+      { id: "c308", wifiId: 3, wifiName: "WiFi 3 (Perpustakaan)", hostname: "Xiaomi-Redmi-12", customName: "HP Siswa Pinjam Buku", ip: "192.168.88.158", mac: "34:CE:00:13:03:08", vendor: "Xiaomi", deviceType: "phone", downloadSpeed: 0.8, uploadSpeed: 0.2, uptime: "12 menit", status: "active", isBlocked: false },
+
+      // WiFi 4: Kelas X & XI (12 Perangkat)
+      { id: "c401", wifiId: 4, wifiName: "WiFi 4 (Kelas X & XI)", hostname: "Samsung-A05s", customName: "HP Siswa Kelas X-1", ip: "192.168.88.161", mac: "B0:BE:76:14:04:01", vendor: "Samsung", deviceType: "phone", downloadSpeed: 2.4, uploadSpeed: 0.6, uptime: "40 menit", status: "active", isBlocked: false },
+      { id: "c402", wifiId: 4, wifiName: "WiFi 4 (Kelas X & XI)", hostname: "Realme-C53", customName: "HP Siswa Kelas X-2", ip: "192.168.88.162", mac: "CC:98:8A:14:04:02", vendor: "Realme", deviceType: "phone", downloadSpeed: 1.9, uploadSpeed: 0.5, uptime: "30 menit", status: "active", isBlocked: false },
+      { id: "c403", wifiId: 4, wifiName: "WiFi 4 (Kelas X & XI)", hostname: "Infinix-Hot-30i", customName: "HP Siswa Kelas X-3", ip: "192.168.88.163", mac: "A8:2B:B9:14:04:03", vendor: "Infinix", deviceType: "phone", downloadSpeed: 2.1, uploadSpeed: 0.4, uptime: "55 menit", status: "active", isBlocked: false },
+      { id: "c404", wifiId: 4, wifiName: "WiFi 4 (Kelas X & XI)", hostname: "iPhone-11", customName: "HP Siswa Kelas XI-1", ip: "192.168.88.164", mac: "F4:F5:D8:14:04:04", vendor: "Apple Inc.", deviceType: "phone", downloadSpeed: 3.8, uploadSpeed: 1.0, uptime: "1 jam 20 mnt", status: "active", isBlocked: false },
+      { id: "c405", wifiId: 4, wifiName: "WiFi 4 (Kelas X & XI)", hostname: "Vivo-Y17s", customName: "HP Siswa Kelas XI-2", ip: "192.168.88.165", mac: "3C:CD:36:14:04:05", vendor: "Vivo", deviceType: "phone", downloadSpeed: 1.7, uploadSpeed: 0.5, uptime: "15 menit", status: "active", isBlocked: false },
+      { id: "c406", wifiId: 4, wifiName: "WiFi 4 (Kelas X & XI)", hostname: "Laptop-Lenovo-Ideapad", customName: "Laptop Presentasi Materi Kelas X", ip: "192.168.88.166", mac: "04:EA:56:14:04:06", vendor: "Lenovo", deviceType: "laptop", downloadSpeed: 4.5, uploadSpeed: 1.4, uptime: "2 jam 05 mnt", status: "active", isBlocked: false },
+      { id: "c407", wifiId: 4, wifiName: "WiFi 4 (Kelas X & XI)", hostname: "Samsung-Galaxy-M14", customName: "HP Siswa Kelas XI-3", ip: "192.168.88.167", mac: "84:C7:8F:14:04:07", vendor: "Samsung", deviceType: "phone", downloadSpeed: 2.2, uploadSpeed: 0.6, uptime: "45 menit", status: "active", isBlocked: false },
+      { id: "c408", wifiId: 4, wifiName: "WiFi 4 (Kelas X & XI)", hostname: "POCO-M5", customName: "HP Siswa Kelas X-4", ip: "192.168.88.168", mac: "E0:D0:83:14:04:08", vendor: "Xiaomi", deviceType: "phone", downloadSpeed: 3.1, uploadSpeed: 0.8, uptime: "1 jam 00 mnt", status: "active", isBlocked: false },
+      { id: "c409", wifiId: 4, wifiName: "WiFi 4 (Kelas X & XI)", hostname: "OPPO-A18", customName: "HP Siswa Kelas XI-4", ip: "192.168.88.169", mac: "44:04:44:14:04:09", vendor: "OPPO", deviceType: "phone", downloadSpeed: 1.5, uploadSpeed: 0.4, uptime: "35 menit", status: "active", isBlocked: false },
+      { id: "c410", wifiId: 4, wifiName: "WiFi 4 (Kelas X & XI)", hostname: "Redmi-10C", customName: "HP Siswa Kelas X-5", ip: "192.168.88.170", mac: "D4:61:9D:14:04:10", vendor: "Xiaomi", deviceType: "phone", downloadSpeed: 1.8, uploadSpeed: 0.5, uptime: "22 menit", status: "active", isBlocked: false },
+      { id: "c411", wifiId: 4, wifiName: "WiFi 4 (Kelas X & XI)", hostname: "Laptop-Dell-Vostro", customName: "Laptop Tugas Kelompok Siswa XI", ip: "192.168.88.171", mac: "14:18:77:14:04:11", vendor: "Dell Inc.", deviceType: "laptop", downloadSpeed: 3.7, uploadSpeed: 1.2, uptime: "1 jam 40 mnt", status: "active", isBlocked: false },
+      { id: "c412", wifiId: 4, wifiName: "WiFi 4 (Kelas X & XI)", hostname: "Vivo-Y02", customName: "HP Siswa Kelas X-6", ip: "192.168.88.172", mac: "10:48:B1:14:04:12", vendor: "Vivo", deviceType: "phone", downloadSpeed: 1.3, uploadSpeed: 0.3, uptime: "18 menit", status: "active", isBlocked: false },
+
+      // WiFi 5: Kelas XII (10 Perangkat)
+      { id: "c501", wifiId: 5, wifiName: "WiFi 5 (Kelas XII)", hostname: "Samsung-Galaxy-A54-XII", customName: "HP Siswa XII MIPA 1 (Ketua Kelas)", ip: "192.168.88.181", mac: "38:F9:D3:15:05:01", vendor: "Samsung", deviceType: "phone", downloadSpeed: 3.6, uploadSpeed: 1.1, uptime: "1 jam 15 mnt", status: "active", isBlocked: false },
+      { id: "c502", wifiId: 5, wifiName: "WiFi 5 (Kelas XII)", hostname: "iPhone-13", customName: "HP Siswa XII MIPA 2", ip: "192.168.88.182", mac: "60:F4:45:15:05:02", vendor: "Apple Inc.", deviceType: "phone", downloadSpeed: 4.2, uploadSpeed: 1.3, uptime: "50 menit", status: "active", isBlocked: false },
+      { id: "c503", wifiId: 5, wifiName: "WiFi 5 (Kelas XII)", hostname: "Laptop-Asus-Zenbook-XII", customName: "Laptop Simulasi Ujian Mandiri XII", ip: "192.168.88.183", mac: "70:4D:7B:15:05:03", vendor: "Asus", deviceType: "laptop", downloadSpeed: 5.9, uploadSpeed: 2.2, uptime: "2 jam 25 mnt", status: "active", isBlocked: false },
+      { id: "c504", wifiId: 5, wifiName: "WiFi 5 (Kelas XII)", hostname: "Xiaomi-12-Lite", customName: "HP Siswa XII IPS 1", ip: "192.168.88.184", mac: "88:66:A5:15:05:04", vendor: "Xiaomi", deviceType: "phone", downloadSpeed: 2.8, uploadSpeed: 0.8, uptime: "45 menit", status: "active", isBlocked: false },
+      { id: "c505", wifiId: 5, wifiName: "WiFi 5 (Kelas XII)", hostname: "Realme-GT-Master", customName: "HP Siswa XII MIPA 3", ip: "192.168.88.185", mac: "9C:28:40:15:05:05", vendor: "Realme", deviceType: "phone", downloadSpeed: 3.1, uploadSpeed: 0.9, uptime: "35 menit", status: "active", isBlocked: false },
+      { id: "c506", wifiId: 5, wifiName: "WiFi 5 (Kelas XII)", hostname: "Laptop-HP-14s", customName: "Laptop Pendaftaran SNBP / SNBT Siswa XII", ip: "192.168.88.186", mac: "20:1E:88:15:05:06", vendor: "HP Inc.", deviceType: "laptop", downloadSpeed: 4.0, uploadSpeed: 1.5, uptime: "1 jam 50 mnt", status: "active", isBlocked: false },
+      { id: "c507", wifiId: 5, wifiName: "WiFi 5 (Kelas XII)", hostname: "OPPO-Reno-7", customName: "HP Siswa XII IPS 2", ip: "192.168.88.187", mac: "AC:E3:42:15:05:07", vendor: "OPPO", deviceType: "phone", downloadSpeed: 2.5, uploadSpeed: 0.7, uptime: "20 menit", status: "active", isBlocked: false },
+      { id: "c508", wifiId: 5, wifiName: "WiFi 5 (Kelas XII)", hostname: "Vivo-V25e", customName: "HP Siswa XII MIPA 4", ip: "192.168.88.188", mac: "74:D0:2B:15:05:08", vendor: "Vivo", deviceType: "phone", downloadSpeed: 2.9, uploadSpeed: 0.8, uptime: "55 menit", status: "active", isBlocked: false },
+      { id: "c509", wifiId: 5, wifiName: "WiFi 5 (Kelas XII)", hostname: "Samsung-A34", customName: "HP Siswa XII IPS 3", ip: "192.168.88.189", mac: "2C:FD:A1:15:05:09", vendor: "Samsung", deviceType: "phone", downloadSpeed: 2.1, uploadSpeed: 0.6, uptime: "40 menit", status: "active", isBlocked: false },
+      { id: "c510", wifiId: 5, wifiName: "WiFi 5 (Kelas XII)", hostname: "Infinix-Note-30", customName: "HP Siswa XII MIPA 5", ip: "192.168.88.190", mac: "5C:E9:1E:15:05:10", vendor: "Infinix", deviceType: "phone", downloadSpeed: 2.7, uploadSpeed: 0.7, uptime: "15 menit", status: "active", isBlocked: false },
+
+      // WiFi 6: Tamu & Lapangan (3 Perangkat)
+      { id: "c601", wifiId: 6, wifiName: "WiFi 6 (Tamu & Lapangan)", hostname: "Guest-Device-Dinas", customName: "HP Pengawas Dinas Pendidikan", ip: "192.168.88.195", mac: "80:2B:F9:16:06:01", vendor: "Samsung", deviceType: "phone", downloadSpeed: 2.4, uploadSpeed: 0.8, uptime: "25 menit", status: "active", isBlocked: false },
+      { id: "c602", wifiId: 6, wifiName: "WiFi 6 (Tamu & Lapangan)", hostname: "Laptop-Tamu-StudiBanding", customName: "Laptop Tamu Studi Banding", ip: "192.168.88.196", mac: "D8:F8:83:16:06:02", vendor: "Lenovo", deviceType: "laptop", downloadSpeed: 3.5, uploadSpeed: 1.2, uptime: "35 menit", status: "active", isBlocked: false },
+      { id: "c603", wifiId: 6, wifiName: "WiFi 6 (Tamu & Lapangan)", hostname: "Android-Unknown-99", customName: "Perangkat Tak Dikenal (Tamu Lapangan)", ip: "192.168.88.197", mac: "4A:2E:77:16:06:03", vendor: "Unknown", deviceType: "phone", downloadSpeed: 1.2, uploadSpeed: 0.3, uptime: "10 menit", status: "active", isBlocked: false }
+    ];
+
+    let clientsData = [];
+    let currentWifiFilter = 'all'; // 'all', 1, 2, 3, 4, 5, 6, 'blocked'
+    let activeRenamingClientId = null;
+    let activeDetailClientId = null;
+
+    function initClients() {
+      try {
+        const saved = localStorage.getItem('smansa_mikrotik_clients');
+        if (saved) {
+          const parsed = JSON.parse(saved);
+          if (Array.isArray(parsed) && parsed.length > 0) {
+            clientsData = parsed;
+            return;
+          }
+        }
+      } catch (e) {}
+      clientsData = JSON.parse(JSON.stringify(DEFAULT_SMANSA_CLIENTS));
+    }
+
+    function saveClientsState() {
+      try {
+        localStorage.setItem('smansa_mikrotik_clients', JSON.stringify(clientsData));
+      } catch (e) {}
+    }
+
+    function getClientCountForWifi(wifiId) {
+      if (!clientsData || clientsData.length === 0) initClients();
+      return clientsData.filter(c => c.wifiId === wifiId).length;
+    }
+
+    function filterAndOpenClients(wifiId) {
+      currentWifiFilter = wifiId;
+      switchTab('clients');
+    }
+
+    function filterBlockedTab() {
+      currentWifiFilter = 'blocked';
+      switchTab('clients');
+    }
+
+    function handleClientSearch() {
+      renderClients();
+    }
+
+    function handleClientFilterChange() {
+      renderClients();
+    }
+
+    function setWifiFilter(val) {
+      currentWifiFilter = val;
+      renderClients();
+    }
+
+    function getDeviceIcon(type) {
+      if (type === 'phone') return '📱';
+      if (type === 'laptop') return '💻';
+      if (type === 'desktop') return '🖥️';
+      if (type === 'printer') return '🖨️';
+      return '📡';
+    }
+
+    // Render Clients and Pills
+    function renderClients() {
+      if (!clientsData || clientsData.length === 0) initClients();
+
+      // 1. Update Global Metrics
+      const total = clientsData.length;
+      const blockedList = clientsData.filter(c => c.isBlocked || c.status === 'blocked');
+      const blockedCount = blockedList.length;
+      const activeCount = clientsData.filter(c => c.status === 'active' && !c.isBlocked).length;
+      const phoneCount = clientsData.filter(c => c.deviceType === 'phone').length;
+      const pcCount = clientsData.filter(c => c.deviceType === 'laptop' || c.deviceType === 'desktop').length;
+      const totalBandwidth = parseFloat(clientsData.reduce((acc, c) => acc + (c.isBlocked || c.status === 'kicked' ? 0 : (c.downloadSpeed + c.uploadSpeed)), 0).toFixed(1));
+
+      const elTotal = document.getElementById('statTotalClients');
+      if (elTotal) elTotal.innerText = total;
+      const elActive = document.getElementById('statActiveClients');
+      if (elActive) elActive.innerText = activeCount;
+      const elPhone = document.getElementById('statPhoneClients');
+      if (elPhone) elPhone.innerText = phoneCount;
+      const elPc = document.getElementById('statPcClients');
+      if (elPc) elPc.innerText = pcCount;
+      const elBlocked = document.getElementById('statBlockedClients');
+      if (elBlocked) elBlocked.innerText = blockedCount;
+      const elTotalBw = document.getElementById('statTotalBandwidth');
+      if (elTotalBw) elTotalBw.innerText = totalBandwidth;
+
+      const elNavCount = document.getElementById('headerClientCount');
+      if (elNavCount) elNavCount.innerText = total;
+      const elTabCount = document.getElementById('tabClientCount');
+      if (elTabCount) elTabCount.innerText = total;
+      const elBtnBlocked = document.getElementById('btnBlockedCount');
+      if (elBtnBlocked) elBtnBlocked.innerText = blockedCount;
+
+      // 2. Render WiFi Filter Pills
+      const pillsContainer = document.getElementById('wifiFilterPillsContainer');
+      if (pillsContainer) {
+        let pillsHtml = `
+          <button onclick="setWifiFilter('all')" class="flex-shrink-0 px-3 py-1.5 rounded-xl text-xs font-semibold transition ${currentWifiFilter === 'all' ? 'bg-indigo-600 text-white shadow' : 'bg-slate-800 text-slate-300 hover:text-white'}">
+            🌐 Semua WiFi (${total})
+          </button>
+        `;
+        wifiData.forEach(w => {
+          const count = clientsData.filter(c => c.wifiId === w.id).length;
+          const isSelected = currentWifiFilter === w.id;
+          pillsHtml += `
+            <button onclick="setWifiFilter(${w.id})" class="flex-shrink-0 px-3 py-1.5 rounded-xl text-xs font-medium transition flex items-center gap-1.5 ${isSelected ? 'bg-indigo-600 text-white shadow' : 'bg-slate-800/80 text-slate-300 hover:text-white'}">
+              <span class="w-2 h-2 rounded-full" style="background-color: ${w.color}"></span>
+              <span>W${w.id}: ${w.name.split('(')[1] ? w.name.split('(')[1].replace(')', '') : w.name} (${count})</span>
+            </button>
+          `;
+        });
+        pillsHtml += `
+          <button onclick="setWifiFilter('blocked')" class="flex-shrink-0 px-3 py-1.5 rounded-xl text-xs font-semibold transition flex items-center gap-1.5 ${currentWifiFilter === 'blocked' ? 'bg-red-600 text-white shadow' : 'bg-red-950/40 text-red-300 hover:bg-red-900/50 border border-red-800/40'}">
+            <span class="w-2 h-2 rounded-full bg-red-400"></span>
+            <span>🚫 Terblokir (${blockedCount})</span>
+          </button>
+        `;
+        pillsContainer.innerHTML = pillsHtml;
+      }
+
+      // 3. Filter Clients for Grid
+      const search = (document.getElementById('clientSearchInput')?.value || '').toLowerCase().trim();
+      const typeFilter = document.getElementById('clientTypeFilter')?.value || 'all';
+      const statusFilter = document.getElementById('clientStatusFilter')?.value || 'all';
+
+      let filtered = clientsData.filter(c => {
+        // WiFi filter
+        if (currentWifiFilter === 'blocked') {
+          if (!c.isBlocked && c.status !== 'blocked') return false;
+        } else if (currentWifiFilter !== 'all') {
+          if (c.wifiId !== currentWifiFilter) return false;
+        }
+
+        // Type filter
+        if (typeFilter !== 'all' && c.deviceType !== typeFilter) return false;
+
+        // Status filter
+        if (statusFilter === 'active' && (c.isBlocked || c.status !== 'active')) return false;
+        if (statusFilter === 'blocked' && (!c.isBlocked && c.status !== 'blocked')) return false;
+        if (statusFilter === 'kicked' && c.status !== 'kicked') return false;
+
+        // Search text
+        if (search) {
+          const matchHostname = (c.hostname || '').toLowerCase().includes(search);
+          const matchCustom = (c.customName || '').toLowerCase().includes(search);
+          const matchIp = (c.ip || '').toLowerCase().includes(search);
+          const matchMac = (c.mac || '').toLowerCase().includes(search);
+          const matchVendor = (c.vendor || '').toLowerCase().includes(search);
+          const matchWifi = (c.wifiName || '').toLowerCase().includes(search);
+          if (!matchHostname && !matchCustom && !matchIp && !matchMac && !matchVendor && !matchWifi) return false;
+        }
+
+        return true;
+      });
+
+      // 4. Render Grid Cards
+      const grid = document.getElementById('clientCardsGrid');
+      if (!grid) return;
+
+      if (filtered.length === 0) {
+        grid.innerHTML = `
+          <div class="col-span-full bg-slate-900/60 border border-slate-800 rounded-2xl p-8 text-center text-slate-400 space-y-2">
+            <div class="text-3xl">🔍</div>
+            <p class="font-bold text-white text-sm">Tidak ada perangkat yang sesuai dengan filter.</p>
+            <p class="text-xs text-slate-500">Coba ubah kata kunci pencarian atau ganti filter WiFi.</p>
+          </div>
+        `;
+        return;
+      }
+
+      let gridHtml = '';
+      filtered.forEach(c => {
+        const isBlocked = c.isBlocked || c.status === 'blocked';
+        const isKicked = c.status === 'kicked';
+        const targetWifi = wifiData.find(w => w.id === c.wifiId) || { color: '#6366f1' };
+        
+        // Status Badge
+        let statusBadge = '';
+        if (isBlocked) {
+          statusBadge = `<span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-red-500/20 text-red-400 border border-red-500/40 animate-pulse">🔴 DIBLOKIR</span>`;
+        } else if (isKicked) {
+          statusBadge = `<span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-500/20 text-amber-300 border border-amber-500/40">⚡ Terputus (Kicked)</span>`;
+        } else {
+          statusBadge = `<span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/15 text-emerald-400 border border-emerald-500/30 flex items-center gap-1"><span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span> Online</span>`;
+        }
+
+        // Live Speed Display
+        const speedDown = isBlocked || isKicked ? 0 : c.downloadSpeed;
+        const speedUp = isBlocked || isKicked ? 0 : c.uploadSpeed;
+
+        gridHtml += `
+          <div class="bg-[#111827]/90 border ${isBlocked ? 'border-red-900/60 bg-red-950/10' : isKicked ? 'border-amber-900/50 bg-amber-950/10' : 'border-slate-800 hover:border-slate-700/80'} rounded-2xl p-4 shadow-lg backdrop-blur-sm transition relative space-y-3">
+            
+            <!-- Header: Icon, Names, Status -->
+            <div class="flex items-start justify-between gap-2">
+              <div class="flex items-center gap-2.5 min-w-0">
+                <div class="w-10 h-10 rounded-xl bg-slate-800 border border-slate-700 flex items-center justify-center text-lg flex-shrink-0 shadow-inner">
+                  ${getDeviceIcon(c.deviceType)}
+                </div>
+                <div class="min-w-0">
+                  <div class="flex items-center gap-1.5">
+                    <span class="font-bold text-xs sm:text-sm text-white truncate max-w-[140px] sm:max-w-[170px]" title="${c.customName || c.hostname}">
+                      ${c.customName || c.hostname}
+                    </span>
+                    <button onclick="openRenameClientModal('${c.id}')" class="p-1 text-slate-400 hover:text-indigo-400 rounded hover:bg-slate-800 transition" title="Ganti Nama / Tag Pemilik">
+                      <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
+                    </button>
+                  </div>
+                  <div class="text-[11px] text-slate-400 truncate font-mono">
+                    ${c.hostname} • <span class="text-slate-500">${c.vendor}</span>
+                  </div>
+                </div>
+              </div>
+              <div class="flex-shrink-0">
+                ${statusBadge}
+              </div>
+            </div>
+
+            <!-- AP Connection & Network Pill -->
+            <div class="flex items-center justify-between text-[11px] bg-slate-950/80 p-2 rounded-xl border border-slate-800/80">
+              <div class="flex items-center gap-1.5 min-w-0">
+                <span class="w-2.5 h-2.5 rounded-full flex-shrink-0" style="background-color: ${targetWifi.color}"></span>
+                <span class="text-slate-200 font-semibold truncate text-[11px]">${c.wifiName}</span>
+              </div>
+              <span class="text-[10px] text-slate-500 font-medium font-mono">${c.uptime}</span>
+            </div>
+
+            <!-- IP & MAC address row -->
+            <div class="grid grid-cols-2 gap-2 text-[11px] font-mono">
+              <div class="bg-slate-950/50 p-1.5 px-2.5 rounded-lg border border-slate-800/80 flex items-center justify-between">
+                <span class="text-slate-500 text-[10px]">IP:</span>
+                <span class="text-indigo-300 font-bold">${c.ip}</span>
+              </div>
+              <div class="bg-slate-950/50 p-1.5 px-2.5 rounded-lg border border-slate-800/80 flex items-center justify-between">
+                <span class="text-slate-500 text-[10px]">MAC:</span>
+                <span class="text-slate-300 text-[10px] truncate max-w-[90px]" title="${c.mac}">${c.mac}</span>
+              </div>
+            </div>
+
+            <!-- Live Bandwidth Meter -->
+            <div class="bg-slate-950/70 p-2.5 rounded-xl border border-slate-800/80 space-y-1.5">
+              <div class="flex items-center justify-between text-[11px]">
+                <span class="text-slate-400 flex items-center gap-1">
+                  <svg class="w-3.5 h-3.5 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3"></path></svg>
+                  <span>⬇ ${speedDown} Mbps</span>
+                </span>
+                <span class="text-slate-400 flex items-center gap-1">
+                  <svg class="w-3.5 h-3.5 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 10l7-7m0 0l7 7m-7-7v18"></path></svg>
+                  <span>⬆ ${speedUp} Mbps</span>
+                </span>
+              </div>
+              <!-- Mini Traffic Bar -->
+              <div class="w-full h-1.5 bg-slate-800 rounded-full overflow-hidden">
+                <div class="h-full rounded-full transition-all duration-500 ${isBlocked ? 'bg-red-500 w-0' : 'bg-gradient-to-r from-blue-500 to-indigo-500'}" style="width: ${Math.min(100, (speedDown / 10) * 100)}%"></div>
+              </div>
+            </div>
+
+            <!-- DECISION BUTTONS (AKSI KEPUTUSAN ADMIN) -->
+            <div class="pt-1 grid grid-cols-2 gap-2 text-xs">
+              <!-- Kick Button -->
+              <button onclick="kickClient('${c.id}')" class="py-2 px-2.5 rounded-xl bg-amber-500/10 hover:bg-amber-500/20 text-amber-300 border border-amber-500/30 font-semibold flex items-center justify-center gap-1 transition active:scale-95 shadow-sm" title="Putus koneksi aktif perangkat ini">
+                <svg class="w-3.5 h-3.5 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+                <span>⚡ Putus (Kick)</span>
+              </button>
+
+              <!-- Block / Unblock Button -->
+              ${isBlocked ? `
+                <button onclick="toggleBlockClient('${c.id}')" class="py-2 px-2.5 rounded-xl bg-emerald-500/15 hover:bg-emerald-500/25 text-emerald-400 border border-emerald-500/40 font-semibold flex items-center justify-center gap-1 transition active:scale-95 shadow-sm">
+                  <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                  <span>✅ Buka Blokir</span>
+                </button>
+              ` : `
+                <button onclick="toggleBlockClient('${c.id}')" class="py-2 px-2.5 rounded-xl bg-red-500/15 hover:bg-red-500/25 text-red-400 border border-red-500/30 font-semibold flex items-center justify-center gap-1 transition active:scale-95 shadow-sm" title="Blokir akses internet (Drop Firewall)">
+                  <svg class="w-3.5 h-3.5 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636"></path></svg>
+                  <span>🚫 Blokir</span>
+                </button>
+              `}
+            </div>
+
+            <!-- Bottom secondary links: RouterOS script & rename -->
+            <div class="flex items-center justify-between text-[11px] pt-1 text-slate-400 border-t border-slate-800/80">
+              <button onclick="openClientDetailModal('${c.id}')" class="hover:text-cyan-400 flex items-center gap-1 transition">
+                <svg class="w-3 h-3 text-cyan-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>
+                <span>Lihat Perintah RouterOS</span>
+              </button>
+              <button onclick="openRenameClientModal('${c.id}')" class="hover:text-indigo-400 transition">
+                <span>✏️ Beri Nama</span>
+              </button>
+            </div>
+
+          </div>
+        `;
+      });
+
+      grid.innerHTML = gridHtml;
+    }
+
+    // Aksi 1: Putus Koneksi (Kick)
+    async function kickClient(id) {
+      const client = clientsData.find(c => c.id === id);
+      if (!client) return;
+
+      client.status = 'kicked';
+      client.downloadSpeed = 0;
+      client.uploadSpeed = 0;
+      saveClientsState();
+      renderClients();
+      renderWifiCards();
+
+      showToast(`⚡ Koneksi untuk ${client.customName || client.hostname} (${client.ip}) berhasil diputus dari router!`);
+
+      // Sync with server if online
+      try {
+        await fetch('/api/clients/kick', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ id: client.id, mac: client.mac, ip: client.ip })
+        });
+      } catch (e) {}
+    }
+
+    // Aksi 2: Blokir / Buka Blokir (Blacklist Drop)
+    async function toggleBlockClient(id) {
+      const client = clientsData.find(c => c.id === id);
+      if (!client) return;
+
+      const wasBlocked = client.isBlocked || client.status === 'blocked';
+      if (wasBlocked) {
+        // Unblock
+        client.isBlocked = false;
+        client.status = 'active';
+        client.downloadSpeed = parseFloat((Math.random() * 2 + 1.5).toFixed(1));
+        client.uploadSpeed = parseFloat((Math.random() * 0.8 + 0.3).toFixed(1));
+        saveClientsState();
+        renderClients();
+        renderWifiCards();
+        showToast(`✅ Akses internet untuk ${client.customName || client.hostname} berhasil dipulihkan.`);
+
+        try {
+          await fetch('/api/clients/unblock', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ id: client.id, mac: client.mac, ip: client.ip })
+          });
+        } catch (e) {}
+      } else {
+        // Block
+        client.isBlocked = true;
+        client.status = 'blocked';
+        client.downloadSpeed = 0;
+        client.uploadSpeed = 0;
+        saveClientsState();
+        renderClients();
+        renderWifiCards();
+        showToast(`🚫 Perangkat ${client.customName || client.hostname} (${client.ip}) BERHASIL DIBLOKIR dari internet!`);
+
+        try {
+          await fetch('/api/clients/block', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ id: client.id, mac: client.mac, ip: client.ip })
+          });
+        } catch (e) {}
+      }
+    }
+
+    // Aksi 3: Kick Semua Klien Tamu di WiFi 6
+    async function kickAllGuests() {
+      const guests = clientsData.filter(c => c.wifiId === 6);
+      if (guests.length === 0) {
+        showToast("Tidak ada perangkat tamu yang terdeteksi di WiFi 6.");
+        return;
+      }
+
+      guests.forEach(g => {
+        g.status = 'kicked';
+        g.downloadSpeed = 0;
+        g.uploadSpeed = 0;
+      });
+      saveClientsState();
+      renderClients();
+      renderWifiCards();
+
+      showToast(`⚡ Sukses! ${guests.length} perangkat di WiFi 6 (Tamu & Lapangan) berhasil diputus!`);
+
+      try {
+        await fetch('/api/clients/kick-wifi', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ wifiId: 6 })
+        });
+      } catch (e) {}
+    }
+
+    // Rename Client Modal
+    function openRenameClientModal(id) {
+      activeRenamingClientId = id;
+      const client = clientsData.find(c => c.id === id);
+      if (!client) return;
+
+      document.getElementById('renameClientHostname').innerText = client.hostname;
+      document.getElementById('renameClientIp').innerText = client.ip;
+      document.getElementById('renameClientMac').innerText = client.mac;
+      document.getElementById('renameClientInput').value = client.customName || '';
+
+      document.getElementById('renameClientModal').classList.remove('hidden');
+      setTimeout(() => document.getElementById('renameClientInput').focus(), 100);
+    }
+
+    function closeRenameClientModal() {
+      document.getElementById('renameClientModal').classList.add('hidden');
+      activeRenamingClientId = null;
+    }
+
+    async function saveClientCustomName() {
+      if (!activeRenamingClientId) return;
+      const client = clientsData.find(c => c.id === activeRenamingClientId);
+      if (!client) return;
+
+      const newName = (document.getElementById('renameClientInput').value || '').trim();
+      client.customName = newName;
+      saveClientsState();
+      closeRenameClientModal();
+      renderClients();
+
+      showToast(`Nama label perangkat berhasil diperbarui: "${newName || client.hostname}"`);
+
+      try {
+        await fetch('/api/clients/rename', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ id: client.id, customName: newName })
+        });
+      } catch (e) {}
+    }
+
+    // Detail & Script Modal
+    function openClientDetailModal(id) {
+      activeDetailClientId = id;
+      const client = clientsData.find(c => c.id === id);
+      if (!client) return;
+
+      document.getElementById('detailDeviceIcon').innerText = getDeviceIcon(c => client.deviceType);
+      document.getElementById('detailDeviceTitle').innerText = client.customName || client.hostname;
+      document.getElementById('detailDeviceSubtitle').innerText = `${client.vendor} • IP: ${client.ip} • MAC: ${client.mac}`;
+      document.getElementById('detailCustomName').innerText = client.customName || '-';
+      document.getElementById('detailHostname').innerText = client.hostname;
+      document.getElementById('detailIp').innerText = client.ip;
+      document.getElementById('detailMac').innerText = client.mac;
+      document.getElementById('detailWifiName').innerText = client.wifiName;
+
+      const isBlocked = client.isBlocked || client.status === 'blocked';
+      document.getElementById('detailStatusBadge').innerHTML = isBlocked 
+        ? `<span class="text-red-400 font-bold">🔴 Terblokir (Drop Firewall)</span>`
+        : `<span class="text-emerald-400 font-bold">🟢 Online Aktif</span>`;
+
+      // RouterOS Command Cheat Sheets
+      const kickCmd = `/ip firewall connection remove [find src-address="${client.ip}"];\n/ip dhcp-server lease remove [find mac-address="${client.mac}"];`;
+      document.getElementById('detailKickCode').innerText = kickCmd;
+
+      const blockCmd = `/ip firewall address-list add list=BLOCKED_CLIENTS address=${client.ip} comment="Blocked: ${client.customName || client.hostname}";\n/ip firewall filter add chain=forward src-mac-address=${client.mac} action=drop comment="BLOCKED_BY_ADMIN";`;
+      document.getElementById('detailBlockCode').innerText = blockCmd;
+
+      // Action Buttons inside modal
+      const btnContainer = document.getElementById('detailActionButtons');
+      btnContainer.innerHTML = `
+        <button onclick="kickClient('${client.id}'); closeClientDetailModal();" class="px-3 py-1.5 rounded-xl bg-amber-500/20 text-amber-300 border border-amber-500/40 text-xs font-semibold flex items-center gap-1">
+          ⚡ Putus Sekarang
+        </button>
+        <button onclick="toggleBlockClient('${client.id}'); closeClientDetailModal();" class="px-3 py-1.5 rounded-xl ${isBlocked ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/40' : 'bg-red-500/20 text-red-400 border border-red-500/40'} text-xs font-semibold flex items-center gap-1">
+          ${isBlocked ? '✅ Buka Blokir' : '🚫 Blokir Internet'}
+        </button>
+      `;
+
+      document.getElementById('clientDetailModal').classList.remove('hidden');
+    }
+
+    function closeClientDetailModal() {
+      document.getElementById('clientDetailModal').classList.add('hidden');
+      activeDetailClientId = null;
+    }
+
+    function copyDetailKickCommand() {
+      const code = document.getElementById('detailKickCode').innerText;
+      navigator.clipboard.writeText(code).then(() => {
+        showToast("Perintah RouterOS Kick berhasil disalin!");
+      });
+    }
+
+    function copyDetailBlockCommand() {
+      const code = document.getElementById('detailBlockCode').innerText;
+      navigator.clipboard.writeText(code).then(() => {
+        showToast("Perintah RouterOS Blokir berhasil disalin!");
+      });
+    }
+
+    // Modal Blacklist Overview
+    function openBlockedListModal() {
+      const list = clientsData.filter(c => c.isBlocked || c.status === 'blocked');
+      const container = document.getElementById('blockedListContent');
+
+      if (list.length === 0) {
+        container.innerHTML = `
+          <div class="p-8 text-center text-slate-400 bg-slate-950 rounded-xl border border-slate-800 space-y-1">
+            <div class="text-3xl">🛡️</div>
+            <p class="font-bold text-white text-sm">Tidak ada perangkat yang sedang diblokir.</p>
+            <p class="text-xs text-slate-500">Seluruh perangkat yang terkoneksi memiliki akses internet normal.</p>
+          </div>
+        `;
+      } else {
+        let h = '<div class="space-y-2">';
+        list.forEach(c => {
+          h += `
+            <div class="bg-slate-950 p-3 rounded-xl border border-red-900/60 flex items-center justify-between gap-3 text-xs">
+              <div class="min-w-0">
+                <div class="flex items-center gap-2">
+                  <span class="font-bold text-white truncate">${c.customName || c.hostname}</span>
+                  <span class="text-[10px] px-1.5 py-0.5 rounded bg-red-950 text-red-400 font-mono">BLOCKED</span>
+                </div>
+                <div class="text-[11px] text-slate-400 font-mono mt-0.5">
+                  IP: <span class="text-indigo-400">${c.ip}</span> • MAC: <span>${c.mac}</span> • ${c.wifiName}
+                </div>
+              </div>
+              <button onclick="toggleBlockClient('${c.id}'); openBlockedListModal();" class="px-3 py-1.5 rounded-lg bg-emerald-500/15 hover:bg-emerald-500/25 text-emerald-400 border border-emerald-500/40 text-xs font-semibold flex-shrink-0 transition">
+                ✅ Buka Blokir
+              </button>
+            </div>
+          `;
+        });
+        h += '</div>';
+        container.innerHTML = h;
+      }
+
+      document.getElementById('blockedListModal').classList.remove('hidden');
+    }
+
+    function closeBlockedListModal() {
+      document.getElementById('blockedListModal').classList.add('hidden');
+    }
+
+    // Refresh data handler
+    async function refreshClientsData() {
+      const icon = document.getElementById('refreshClientIcon');
+      if (icon) icon.classList.add('animate-spin');
+
+      try {
+        const res = await fetch('/api/clients');
+        if (res.ok) {
+          const json = await res.json();
+          if (json.clients && Array.isArray(json.clients)) {
+            // merge
+            json.clients.forEach(serverClient => {
+              const local = clientsData.find(c => c.id === serverClient.id);
+              if (local) {
+                local.status = serverClient.status;
+                local.isBlocked = serverClient.isBlocked;
+                local.customName = serverClient.customName;
+              }
+            });
+            saveClientsState();
+          }
+        }
+      } catch (e) {}
+
+      renderClients();
+      renderWifiCards();
+
+      setTimeout(() => {
+        if (icon) icon.classList.remove('animate-spin');
+        showToast("Data 75 klien diperbarui secara langsung!");
+      }, 500);
+    }
+
+    // Periodic Traffic Animation for alive experience
+    setInterval(() => {
+      if (!clientsData || clientsData.length === 0) return;
+      clientsData.forEach(c => {
+        if (!c.isBlocked && c.status === 'active') {
+          // Micro variation ±0.3 Mbps
+          const delta = (Math.random() - 0.48) * 0.4;
+          c.downloadSpeed = Math.max(0.2, parseFloat((c.downloadSpeed + delta).toFixed(1)));
+        }
+      });
+      // If clients tab is open, update visually
+      const secClients = document.getElementById('section-clients');
+      if (secClients && !secClients.classList.contains('hidden')) {
+        renderClients();
+      }
+    }, 4500);
+
     // Init
     checkAuthOnLoad();
+    initClients();
     renderWifiCards();
+    renderClients();
     loadInitialSettings();
   </script>
 </body>
