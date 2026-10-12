@@ -578,7 +578,9 @@ const server = http.createServer(async (req, res) => {
       if (ext === '.js') contentType = 'text/javascript';
       if (ext === '.css') contentType = 'text/css';
       if (ext === '.png') contentType = 'image/png';
-      if (ext === '.jpg') contentType = 'image/jpeg';
+      if (ext === '.ico') contentType = 'image/x-icon';
+      if (ext === '.svg') contentType = 'image/svg+xml';
+      if (ext === '.jpg' || ext === '.jpeg') contentType = 'image/jpeg';
       if (ext === '.json') contentType = 'application/json';
 
       res.writeHead(200, { 'Content-Type': contentType });
