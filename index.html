@@ -149,6 +149,11 @@
                 <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
                 <span>RouterOS v7 • hEX E50UG</span>
               </span>
+              <!-- Data Mode Badge (Simulasi vs Fisik) -->
+              <button onclick="openDataModeModal()" id="dataModeBadge" class="inline-flex items-center gap-1.5 text-[10px] font-semibold px-2.5 py-0.5 rounded-full bg-amber-500/10 hover:bg-amber-500/20 text-amber-400 border border-amber-500/30 transition cursor-pointer" title="Klik untuk panduan koneksi alat fisik / ganti mode data">
+                <span class="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse"></span>
+                <span id="dataModeText">Mode Simulasi (Pratinjau)</span>
+              </button>
             </div>
             <div class="flex items-center gap-2 text-[11px] text-slate-400">
               <span class="truncate">SMAN 1 Belitang Network Console</span>
@@ -776,7 +781,7 @@
         </div>
 
         <!-- Tool 5: Auto Setup 1-Klik -->
-        <div onclick="closeToolsModal(); openAutoSetupModal();" class="p-3.5 rounded-2xl bg-slate-950/80 border border-slate-800 hover:border-amber-500/50 hover:bg-slate-950 transition cursor-pointer group flex flex-col justify-between sm:col-span-2">
+        <div onclick="closeToolsModal(); openAutoSetupModal();" class="p-3.5 rounded-2xl bg-slate-950/80 border border-slate-800 hover:border-amber-500/50 hover:bg-slate-950 transition cursor-pointer group flex flex-col justify-between">
           <div class="flex items-start gap-3">
             <div class="w-9 h-9 rounded-xl bg-amber-500/10 text-amber-400 flex items-center justify-center flex-shrink-0 group-hover:scale-105 transition text-base">
               ⚡
@@ -791,10 +796,134 @@
           </div>
         </div>
 
+        <!-- Tool 6: Mode Data & Panduan Pasang Fisik -->
+        <div onclick="closeToolsModal(); openDataModeModal();" class="p-3.5 rounded-2xl bg-slate-950/80 border border-slate-800 hover:border-emerald-500/50 hover:bg-slate-950 transition cursor-pointer group flex flex-col justify-between">
+          <div class="flex items-start gap-3">
+            <div class="w-9 h-9 rounded-xl bg-emerald-500/10 text-emerald-400 flex items-center justify-center flex-shrink-0 group-hover:scale-105 transition text-base">
+              🔌
+            </div>
+            <div>
+              <h4 class="font-bold text-white text-xs group-hover:text-emerald-300 transition">Mode Data & Panduan Pasang Fisik</h4>
+              <p class="text-[11px] text-slate-400 mt-1">Penjelasan data simulasi vs alat fisik asli, reset ke 0 klien, & urutan colok kabel.</p>
+            </div>
+          </div>
+          <div class="mt-3 flex items-center justify-end text-[11px] font-semibold text-emerald-400 group-hover:translate-x-1 transition">
+            Panduan & Mode Data ➔
+          </div>
+        </div>
+
       </div>
 
       <div class="flex items-center justify-end pt-3 border-t border-slate-800">
         <button onclick="closeToolsModal()" class="px-4 py-2 text-xs rounded-xl text-slate-300 hover:bg-slate-800 transition">Tutup Menu</button>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- MODAL: PENJELASAN MODE SIMULASI & PANDUAN SAMBUNG ALAT FISIK -->
+  <div id="dataModeModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 hidden flex items-end sm:items-center justify-center p-0 sm:p-4">
+    <div class="bg-slate-900 border border-slate-800 rounded-t-3xl sm:rounded-2xl max-w-2xl w-full p-5 sm:p-6 shadow-2xl space-y-4 max-h-[92vh] overflow-y-auto">
+      
+      <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+        <div class="flex items-center gap-2.5">
+          <div class="w-9 h-9 rounded-xl bg-amber-500/20 text-amber-400 flex items-center justify-center border border-amber-500/30 text-lg">
+            🔌
+          </div>
+          <div>
+            <h3 class="font-bold text-white text-base">Status Data & Panduan Sambung Alat Fisik</h3>
+            <p class="text-xs text-slate-400">Bagaimana sistem bekerja saat MikroTik, Hub, dan WiFi dinyalakan</p>
+          </div>
+        </div>
+        <button onclick="closeDataModeModal()" class="text-slate-400 hover:text-white text-2xl p-1 font-bold leading-none">&times;</button>
+      </div>
+
+      <!-- Penjelasan 1: Kenapa Saat Ini Sudah Ada Isinya? -->
+      <div class="p-3.5 rounded-xl bg-amber-500/10 border border-amber-500/30 text-xs space-y-1.5">
+        <div class="font-bold text-amber-300 flex items-center gap-1.5">
+          <span>💡</span> <span>Kenapa saat ini sudah ada isinya padahal alat belum dinyalakan?</span>
+        </div>
+        <p class="text-slate-300 text-[11px] leading-relaxed">
+          Data <strong>75 klien</strong> (nama HP/laptop, grafik trafik 24.5 Mbps, CPU 4%) yang tampil saat ini adalah <strong>Data Simulasi (Pratinjau / Demo Mode)</strong>. Tujuannya agar Anda bisa melihat dan mencoba seluruh fungsi dashboard (seperti tombol <em>Kick</em>, <em>Blokir</em>, <em>Ganti Nama</em>, dan slider bandwidth) sebelum alat fisiknya dipasang di sekolah.
+        </p>
+      </div>
+
+      <!-- Penjelasan 2: Bagaimana Cara Kerjanya Begitu Alat Fisik Dihidupkan? -->
+      <div class="p-3.5 rounded-xl bg-slate-950 border border-slate-800 text-xs space-y-2.5">
+        <div class="font-bold text-white flex items-center gap-1.5 text-xs">
+          <span>⚡</span> <span>Bagaimana nanti saat MikroTik & Switch Hub mulai dinyalakan?</span>
+        </div>
+        
+        <div class="space-y-2 text-[11px] text-slate-300 pl-1">
+          <div class="flex items-start gap-2">
+            <span class="w-5 h-5 rounded-full bg-indigo-600/30 text-indigo-400 flex items-center justify-center font-bold flex-shrink-0 text-[10px]">1</span>
+            <div>
+              <strong class="text-white">Awalnya akan 0 Klien:</strong> Saat router baru dihidupkan, belum ada HP/Laptop yang terhubung. Angka klien akan mulai dari 0.
+            </div>
+          </div>
+          <div class="flex items-start gap-2">
+            <span class="w-5 h-5 rounded-full bg-indigo-600/30 text-indigo-400 flex items-center justify-center font-bold flex-shrink-0 text-[10px]">2</span>
+            <div>
+              <strong class="text-white">Deteksi Otomatis Real-Time:</strong> Begitu HP siswa dan guru mulai tersambung ke salah satu WiFi (WiFi 1 s/d 6), MikroTik akan otomatis memberikan IP (DHCP Lease). Nama HP, tipe perangkat, dan IP akan <strong>otomatis muncul sendiri di dashboard ini</strong>!
+            </div>
+          </div>
+          <div class="flex items-start gap-2">
+            <span class="w-5 h-5 rounded-full bg-indigo-600/30 text-indigo-400 flex items-center justify-center font-bold flex-shrink-0 text-[10px]">3</span>
+            <div>
+              <strong class="text-white">Data Simulasi Akan Digantikan:</strong> Begitu router fisik terhubung, seluruh data simulasi akan langsung tergantikan 100% oleh HP/Laptop asli yang sedang online.
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Panduan Colok Kabel -->
+      <div class="p-3.5 rounded-xl bg-slate-950 border border-slate-800 text-xs space-y-2">
+        <div class="font-bold text-white flex items-center gap-1.5 text-xs">
+          <span>🛠️</span> <span>Urutan Colok Kabel Saat Mau Menghidupkan Alat:</span>
+        </div>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-[11px]">
+          <div class="p-2 rounded-lg bg-slate-900 border border-slate-800/80">
+            <span class="text-emerald-400 font-bold block">1. Kabel Internet Indibiz:</span>
+            Dari modem Indibiz colok ke <strong class="text-white">Port 1 (WAN)</strong> MikroTik hEX.
+          </div>
+          <div class="p-2 rounded-lg bg-slate-900 border border-slate-800/80">
+            <span class="text-indigo-400 font-bold block">2. Kabel ke Switch Hub:</span>
+            Dari <strong class="text-white">Port 2 MikroTik</strong> colok ke <strong class="text-white">Port 1 Switch Hub TL-SG1016D</strong>.
+          </div>
+          <div class="p-2 rounded-lg bg-slate-900 border border-slate-800/80">
+            <span class="text-purple-400 font-bold block">3. Kabel ke 6 WiFi AP:</span>
+            Dari Switch Hub (Port 2–7) colok ke masing-masing 6 Access Point WiFi.
+          </div>
+          <div class="p-2 rounded-lg bg-slate-900 border border-slate-800/80">
+            <span class="text-amber-400 font-bold block">4. Sambungkan Komputer:</span>
+            Colok laptop operator ke Switch Hub atau via WiFi apa saja.
+          </div>
+        </div>
+      </div>
+
+      <!-- Tombol Pengalih Mode Data -->
+      <div class="pt-2 border-t border-slate-800 space-y-2">
+        <div class="text-[11px] text-slate-400 font-semibold">Pilih Mode Data untuk Dashboard Ini Sekarang:</div>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+          <button onclick="clearToLiveHardwareMode()" class="p-3 rounded-xl bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 text-left transition flex items-center gap-2.5">
+            <span class="text-xl">🧹</span>
+            <div>
+              <div class="font-bold text-xs">Kosongkan Jadi 0 Klien</div>
+              <div class="text-[10px] text-slate-400">Siap untuk dihubungkan ke MikroTik fisik sekolah</div>
+            </div>
+          </button>
+          <button onclick="restoreSimulationData()" class="p-3 rounded-xl bg-indigo-500/10 hover:bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 text-left transition flex items-center gap-2.5">
+            <span class="text-xl">🔄</span>
+            <div>
+              <div class="font-bold text-xs">Isi Data Simulasi (75 Klien)</div>
+              <div class="text-[10px] text-slate-400">Tampilkan data percontohan untuk demo / latihan</div>
+            </div>
+          </button>
+        </div>
+      </div>
+
+      <div class="flex items-center justify-end pt-2 border-t border-slate-800">
+        <button onclick="closeDataModeModal()" class="px-4 py-2 text-xs rounded-xl text-slate-300 hover:bg-slate-800 transition">Tutup Panduan</button>
       </div>
 
     </div>
@@ -1289,6 +1418,48 @@
     function closeToolsModal() {
       const m = document.getElementById('toolsModal');
       if (m) m.classList.add('hidden');
+    }
+
+    function openDataModeModal() {
+      const m = document.getElementById('dataModeModal');
+      if (m) m.classList.remove('hidden');
+    }
+
+    function closeDataModeModal() {
+      const m = document.getElementById('dataModeModal');
+      if (m) m.classList.add('hidden');
+    }
+
+    function clearToLiveHardwareMode() {
+      clientsData = [];
+      saveClientsState();
+      renderClients();
+      renderWifiCards();
+      updateDataModeBadge(false);
+      closeDataModeModal();
+      showToast("Mode Siap Router Fisik aktif! Data dikosongkan (0 Klien).");
+    }
+
+    function restoreSimulationData() {
+      clientsData = JSON.parse(JSON.stringify(DEFAULT_SMANSA_CLIENTS));
+      saveClientsState();
+      renderClients();
+      renderWifiCards();
+      updateDataModeBadge(true);
+      closeDataModeModal();
+      showToast("Data Simulasi (75 Klien) dipulihkan untuk pratinjau!");
+    }
+
+    function updateDataModeBadge(isSim) {
+      const badge = document.getElementById('dataModeBadge');
+      if (!badge) return;
+      if (isSim) {
+        badge.className = "inline-flex items-center gap-1.5 text-[10px] font-semibold px-2.5 py-0.5 rounded-full bg-amber-500/10 hover:bg-amber-500/20 text-amber-400 border border-amber-500/30 transition cursor-pointer";
+        badge.innerHTML = `<span class="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse"></span><span>Mode Simulasi (Pratinjau)</span>`;
+      } else {
+        badge.className = "inline-flex items-center gap-1.5 text-[10px] font-semibold px-2.5 py-0.5 rounded-full bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 transition cursor-pointer";
+        badge.innerHTML = `<span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span><span>Menunggu Koneksi Router Fisik</span>`;
+      }
     }
 
     function openInspectModal() {
@@ -2272,15 +2443,17 @@
     function initClients() {
       try {
         const saved = localStorage.getItem('smansa_mikrotik_clients');
-        if (saved) {
+        if (saved !== null) {
           const parsed = JSON.parse(saved);
-          if (Array.isArray(parsed) && parsed.length > 0) {
+          if (Array.isArray(parsed)) {
             clientsData = parsed;
+            updateDataModeBadge(clientsData.length > 0);
             return;
           }
         }
       } catch (e) {}
       clientsData = JSON.parse(JSON.stringify(DEFAULT_SMANSA_CLIENTS));
+      updateDataModeBadge(true);
     }
 
     function saveClientsState() {
@@ -2290,7 +2463,7 @@
     }
 
     function getClientCountForWifi(wifiId) {
-      if (!clientsData || clientsData.length === 0) initClients();
+      if (!clientsData) initClients();
       return clientsData.filter(c => c.wifiId === wifiId).length;
     }
 
@@ -2425,6 +2598,27 @@
       // 4. Render Grid Cards
       const grid = document.getElementById('clientCardsGrid');
       if (!grid) return;
+
+      if (clientsData.length === 0) {
+        grid.innerHTML = `
+          <div class="col-span-full bg-slate-900/60 border border-dashed border-emerald-500/40 rounded-3xl p-8 sm:p-12 text-center text-slate-400 space-y-3">
+            <div class="text-4xl">🔌</div>
+            <h4 class="font-bold text-white text-base">Mode Siap Sambung: Menunggu Perangkat Konek ke WiFi</h4>
+            <p class="text-xs text-slate-400 max-w-lg mx-auto leading-relaxed">
+              Data simulasi telah dikosongkan (0 Klien). Begitu router MikroTik hEX dan Switch Hub dinyalakan di sekolah, HP siswa dan guru yang tersambung ke WiFi 1 s/d 6 akan otomatis terdeteksi di sini secara real-time!
+            </p>
+            <div class="pt-3 flex flex-wrap items-center justify-center gap-2.5">
+              <button onclick="openDataModeModal()" class="px-4 py-2 text-xs font-semibold rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 transition flex items-center gap-1.5 shadow-sm">
+                📖 Buka Panduan Colok Kabel
+              </button>
+              <button onclick="restoreSimulationData()" class="px-4 py-2 text-xs font-semibold rounded-xl bg-indigo-600/30 hover:bg-indigo-600/40 text-indigo-300 border border-indigo-500/30 transition flex items-center gap-1.5 shadow-sm">
+                🔄 Tampilkan Kembali Data Simulasi (75 Klien)
+              </button>
+            </div>
+          </div>
+        `;
+        return;
+      }
 
       if (filtered.length === 0) {
         grid.innerHTML = `
