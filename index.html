@@ -79,7 +79,7 @@
       </div>
 
       <!-- Login Form -->
-      <form onsubmit="handleLogin(event); return false;" class="space-y-4 relative">
+      <form action="javascript:void(0);" onsubmit="event.preventDefault(); handleLogin(event); return false;" class="space-y-4 relative">
         <div id="loginErrorMsg" class="hidden p-3 rounded-xl bg-red-500/10 border border-red-500/30 text-red-400 text-xs flex items-center gap-2">
           <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
           <span id="loginErrorText">Username atau password salah!</span>
@@ -1401,6 +1401,44 @@
     </div>
   </div>
 
+  <!-- MODAL: RINCIAN PERANGKAT PORT FISIK & SWITCH HUB -->
+  <div id="portDetailModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 hidden flex items-end sm:items-center justify-center p-0 sm:p-4">
+    <div class="bg-slate-900 border border-slate-800 rounded-t-2xl sm:rounded-2xl max-w-3xl w-full p-5 sm:p-6 shadow-2xl space-y-4 max-h-[92vh] overflow-y-auto">
+      
+      <!-- Modal Header -->
+      <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-xl bg-indigo-500/20 text-indigo-400 flex items-center justify-center border border-indigo-500/30 text-lg flex-shrink-0">
+            🔌
+          </div>
+          <div>
+            <div class="flex items-center gap-2">
+              <h3 id="portDetailTitle" class="font-bold text-white text-sm sm:text-base">Port 3 (LAN) MikroTik hEX</h3>
+              <span id="portDetailBadge" class="text-[10px] font-mono px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 font-bold">LINK UP (1 Gbps)</span>
+            </div>
+            <p id="portDetailSubtitle" class="text-xs text-slate-400 mt-0.5">Switch Hub TP-Link TL-SG1016D & Perangkat Terhubung</p>
+          </div>
+        </div>
+        <button onclick="closePortDetailModal()" class="text-slate-400 hover:text-white text-2xl p-1 font-bold leading-none">&times;</button>
+      </div>
+
+      <!-- Modal Content Body -->
+      <div id="portDetailBody" class="space-y-4">
+        <!-- Rendered dynamically -->
+      </div>
+
+      <!-- Modal Footer -->
+      <div class="flex items-center justify-between pt-3 border-t border-slate-800">
+        <button onclick="refreshPortDetailNow()" class="px-3.5 py-2 text-xs font-semibold rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 transition flex items-center gap-1.5 shadow-sm">
+          <svg class="w-3.5 h-3.5 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+          <span>Segarkan Status Fisik</span>
+        </button>
+        <button onclick="closePortDetailModal()" class="px-5 py-2 text-xs font-bold rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white transition">Tutup</button>
+      </div>
+
+    </div>
+  </div>
+
   <!-- Toast Notification -->
   <div id="toast" class="fixed bottom-20 md:bottom-5 right-5 left-5 md:left-auto md:w-80 bg-slate-800 border border-slate-700 text-white text-xs px-4 py-3 rounded-2xl shadow-2xl hidden items-center gap-3 z-50 transition-all">
     <div id="toastIcon">
@@ -1410,6 +1448,16 @@
   </div>
 
   <script>
+    // ==========================================
+    // AUTO-BERSIHKAN '?' DARI URL BROWSER
+    // ==========================================
+    if (window.location.search === '?' || (window.location.href.endsWith('?') && !window.location.search.slice(1))) {
+      try {
+        const cleanUrl = window.location.protocol + "//" + window.location.host + window.location.pathname + window.location.hash;
+        window.history.replaceState({ path: cleanUrl }, document.title, cleanUrl);
+      } catch (err) {}
+    }
+
     // ==========================================
     // BACKEND API BRIDGE (AUTO-DETECT LOCAL / CLOUDFLARE TUNNEL)
     // ==========================================
@@ -1463,6 +1511,12 @@
                           (u === 'admin' && (p === 'admin' || p === 'sman1belitang' || p === 'F2NTZUAKWZ'));
 
       if (isValidUser) {
+        if (window.location.search || window.location.href.includes('?')) {
+          try {
+            const cleanUrl = window.location.protocol + "//" + window.location.host + window.location.pathname + window.location.hash;
+            window.history.replaceState({ path: cleanUrl }, document.title, cleanUrl);
+          } catch (err) {}
+        }
         if (remember) {
           localStorage.setItem('smansa_mikrotik_auth', 'valid');
         } else {
@@ -2038,9 +2092,10 @@
         const ledBg = isUp ? 'bg-emerald-400 shadow-emerald-400/80 shadow-md animate-pulse' : 'bg-slate-700';
         const cardBorder = isUp ? 'border-emerald-500/40 bg-slate-900/90' : 'border-slate-800 bg-slate-950/80';
         const badgeClass = isUp ? 'text-emerald-400 bg-emerald-500/10 border-emerald-500/30' : 'text-slate-500 bg-slate-800/40 border-slate-700/40';
+        const hasDetails = Array.isArray(p.detailDevices) && p.detailDevices.length > 0;
 
         html += `
-          <div class="rounded-xl border ${cardBorder} p-3.5 flex flex-col justify-between transition-all hover:border-slate-600 shadow-inner">
+          <div class="rounded-xl border ${cardBorder} p-3.5 flex flex-col justify-between transition-all hover:border-indigo-500/60 hover:bg-slate-900 shadow-inner cursor-pointer group" onclick="openPortDetailModal(${p.id})">
             <!-- Port Header & LED -->
             <div class="flex items-center justify-between mb-2">
               <div class="flex items-center gap-2">
@@ -2064,12 +2119,21 @@
               </span>
             </div>
 
-            <!-- Connected Device info -->
-            <div class="pt-2 border-t border-slate-800/80 space-y-0.5 text-left">
-              <div class="text-[10px] text-slate-400 uppercase font-semibold">Tersambung:</div>
-              <div class="text-[11px] font-medium ${isUp ? 'text-indigo-300' : 'text-slate-500'} truncate" title="${p.device}">
+            <!-- Connected Device info (No truncate - full clarity) -->
+            <div class="pt-2.5 border-t border-slate-800/80 space-y-1.5 text-left">
+              <div class="flex items-center justify-between">
+                <span class="text-[10px] text-slate-400 uppercase font-semibold">Tersambung:</span>
+                ${hasDetails ? `<span class="text-[9px] font-bold text-indigo-300 font-mono bg-indigo-500/20 px-1.5 py-0.5 rounded border border-indigo-500/30">${p.detailDevices.length} Terdeteksi</span>` : ''}
+              </div>
+              <div class="text-[11px] font-semibold ${isUp ? 'text-indigo-200' : 'text-slate-500'} leading-snug">
                 ${p.device}
               </div>
+              ${isUp ? `
+                <button type="button" onclick="event.stopPropagation(); openPortDetailModal(${p.id});" class="w-full mt-2 py-1.5 px-2 rounded-lg bg-indigo-600/20 group-hover:bg-indigo-600/40 text-indigo-300 border border-indigo-500/30 text-[10px] font-bold flex items-center justify-center gap-1.5 transition">
+                  <svg class="w-3.5 h-3.5 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
+                  <span>Lihat Rincian ${hasDetails ? `(${p.detailDevices.length} Alat)` : 'Port'}</span>
+                </button>
+              ` : ''}
             </div>
           </div>
         `;
@@ -2080,15 +2144,20 @@
       // Update Diagnostic text intelligently
       const diagEl = document.getElementById('portDiagnosticText');
       if (diagEl) {
-        if (port1Up && port2Up && !port3Up) {
+        if (port1Up && port2Up && port3Up) {
+          const p3 = ports.find(p => p.id === 3);
+          const devCount = p3 && Array.isArray(p3.detailDevices) ? p3.detailDevices.length : 15;
+          diagEl.innerHTML = `
+            <strong class="text-emerald-400">Semua Jalur Fisik Berfungsi Normal (1 Gbps Real-Time)!</strong><br>
+            • <strong>Port 1:</strong> Terhubung ke Modem Indibiz Telkom (Sumber Internet 300 Mbps).<br>
+            • <strong>Port 2:</strong> Terhubung langsung ke Laptop Admin BarQie (192.168.88.254).<br>
+            • <strong>Port 3:</strong> Terhubung ke Switch Hub TP-Link TL-SG1016D & Access Point WiFi <strong>AULA SMANSA 02</strong> (${devCount} perangkat aktif terdeteksi).
+          `;
+        } else if (port1Up && port2Up && !port3Up) {
           diagEl.innerHTML = `
             <strong>Kondisi Saat Ini:</strong> Port 1 (Indibiz 🟢) dan Port 2 (🟢) aktif 1 Gbps.<br>
             Namun <strong class="text-rose-400">Port 3 terdeteksi MATI (Link Down)</strong>. Perangkat laptop Anda saat ini terdeteksi berada di <strong>Port 2</strong>.<br>
             👉 <strong>Langkah Anda:</strong> Jika kabel di Port 3 MikroTik dicolokkan ke Switch Hub TP-Link, pastikan <em>Switch Hub TP-Link lampu dayanya sudah menyala</em> dan colokan kabelnya sudah rapat sampai berbunyi <em>klik</em>.
-          `;
-        } else if (port1Up && port2Up && port3Up) {
-          diagEl.innerHTML = `
-            <strong class="text-emerald-400">Semua Jalur Aktif!</strong> Port 1 (Indibiz WAN), Port 2 (LAN), dan Port 3 (LAN) berhasil terhubung 1 Gbps tanpa kendala. Seluruh distribusi jaringan bekerja normal.
           `;
         } else {
           diagEl.innerHTML = `
@@ -2104,6 +2173,216 @@
         const downCount = ports.length - activeCount;
         kpiPort.innerText = `Port: ${activeCount} Aktif, ${downCount} Kosong`;
       }
+
+      // Live update open modal if user is inspecting this port
+      if (currentOpenPortId) {
+        renderPortDetailModal(currentOpenPortId);
+      }
+    }
+
+    // ==========================================
+    // PORT & SWITCH HUB DETAIL MODAL LOGIC
+    // ==========================================
+    let currentOpenPortId = null;
+
+    function openPortDetailModal(portId) {
+      currentOpenPortId = portId;
+      const modal = document.getElementById('portDetailModal');
+      if (!modal) return;
+      modal.classList.remove('hidden');
+      renderPortDetailModal(portId);
+    }
+
+    function closePortDetailModal() {
+      currentOpenPortId = null;
+      const modal = document.getElementById('portDetailModal');
+      if (modal) modal.classList.add('hidden');
+    }
+
+    async function refreshPortDetailNow() {
+      await fetchPortsData(true);
+      if (currentOpenPortId) {
+        renderPortDetailModal(currentOpenPortId);
+      }
+    }
+
+    function renderPortDetailModal(portId) {
+      const port = (lastPortsData || []).find(p => p.id === portId) || {
+        id: portId,
+        name: `Port ${portId}`,
+        running: false,
+        status: 'DOWN',
+        speed: 'Tidak Ada Sinyal',
+        device: 'Kosong',
+        detailDevices: []
+      };
+
+      const titleEl = document.getElementById('portDetailTitle');
+      const badgeEl = document.getElementById('portDetailBadge');
+      const subtitleEl = document.getElementById('portDetailSubtitle');
+      const bodyEl = document.getElementById('portDetailBody');
+
+      if (titleEl) titleEl.innerText = `${port.name} • MikroTik hEX (E50UG)`;
+      if (badgeEl) {
+        badgeEl.className = port.running 
+          ? 'text-[10px] font-mono px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 font-bold'
+          : 'text-[10px] font-mono px-2 py-0.5 rounded-full bg-slate-800 text-slate-400 border border-slate-700 font-bold';
+        badgeEl.innerText = port.running ? `LINK UP (${port.speed})` : 'LINK DOWN (Mati / Lepas)';
+      }
+      if (subtitleEl) {
+        if (portId === 1) subtitleEl.innerText = 'Sumber Internet WAN (Indibiz Telkom 300 Mbps)';
+        else if (portId === 2) subtitleEl.innerText = 'Koneksi Langsung Kabel LAN: Laptop Administrator BarQie';
+        else if (portId === 3) subtitleEl.innerText = 'Distribusi Utama: Switch Hub TP-Link TL-SG1016D & WiFi AULA SMANSA 02';
+        else subtitleEl.innerText = 'Port Cadangan MikroTik';
+      }
+
+      if (!bodyEl) return;
+
+      let html = '';
+
+      if (portId === 3) {
+        const apDevice = (port.detailDevices || []).find(d => d.type === 'ap');
+        const clientDevices = (port.detailDevices || []).filter(d => d.type !== 'ap');
+
+        html += `
+          <!-- Switch Hub Card -->
+          <div class="bg-gradient-to-r from-slate-900 to-indigo-950/70 border border-indigo-500/30 rounded-2xl p-4 shadow-lg space-y-2">
+            <div class="flex items-center justify-between">
+              <div class="flex items-center gap-2.5">
+                <div class="w-9 h-9 rounded-xl bg-indigo-600/30 text-indigo-300 flex items-center justify-center font-bold text-sm border border-indigo-500/40">
+                  🔀
+                </div>
+                <div>
+                  <h4 class="font-bold text-white text-sm">Switch Hub TP-Link TL-SG1016D</h4>
+                  <p class="text-[11px] text-indigo-300 font-mono">16-Port Gigabit Rackmount Switch • Jalur 1 Gbps Full-Duplex</p>
+                </div>
+              </div>
+              <span class="px-2.5 py-1 rounded-full text-[10px] font-bold bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
+                ● Normal & Aktif
+              </span>
+            </div>
+            <p class="text-xs text-slate-300 leading-relaxed pt-1 border-t border-slate-800">
+              Kabel dari Port 3 MikroTik masuk ke Switch Hub ini. Seluruh Access Point WiFi dan perangkat lain dihubungkan melalui port-port di Switch Hub TL-SG1016D.
+            </p>
+          </div>
+
+          <!-- Access Point Card -->
+          <div class="bg-slate-950/90 border border-emerald-500/30 rounded-2xl p-4 shadow-lg space-y-3">
+            <div class="flex items-start justify-between">
+              <div class="flex items-center gap-2.5">
+                <div class="w-9 h-9 rounded-xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center font-bold text-sm border border-emerald-500/30">
+                  📶
+                </div>
+                <div>
+                  <div class="flex items-center gap-2">
+                    <h4 class="font-bold text-white text-sm">Access Point WiFi: AULA SMANSA 02</h4>
+                    <span class="text-[9px] bg-emerald-500/10 text-emerald-300 px-2 py-0.5 rounded-full border border-emerald-500/30 font-bold animate-pulse">SSID Aktif</span>
+                  </div>
+                  <p class="text-[11px] text-slate-400">Ubiquiti UniFi 6 Long-Range (U6-LR)</p>
+                </div>
+              </div>
+              <div class="text-right text-[11px] font-mono">
+                <div class="text-slate-400">IP AP: <strong class="text-white">${apDevice?.ip || '192.168.0.100'}</strong></div>
+                <div class="text-slate-500 text-[10px]">MAC: ${apDevice?.mac || '60:22:32:AB:48:A9'}</div>
+              </div>
+            </div>
+            <div class="p-2.5 rounded-xl bg-slate-900 border border-slate-800 text-xs text-emerald-300 flex items-center gap-2">
+              <svg class="w-4 h-4 flex-shrink-0 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+              <span>Access Point ini tersambung ke port Switch Hub dan saat ini melayani <strong>${clientDevices.length} perangkat HP/klien siswa & guru</strong>.</span>
+            </div>
+          </div>
+
+          <!-- Connected Client Devices List -->
+          <div class="space-y-2.5 pt-1">
+            <div class="flex items-center justify-between">
+              <div class="flex items-center gap-2">
+                <span class="font-bold text-white text-xs sm:text-sm">Perangkat Melewati Switch Hub:</span>
+                <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 font-mono">
+                  ${clientDevices.length} HP & Tablet
+                </span>
+              </div>
+              <button onclick="closePortDetailModal(); switchTab('clients');" class="text-xs text-indigo-400 hover:text-indigo-300 underline font-semibold cursor-pointer">
+                Buka Tab Pantau Klien &rarr;
+              </button>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 max-h-[340px] overflow-y-auto pr-1">
+              ${clientDevices.length === 0 ? `
+                <div class="col-span-full p-4 rounded-xl bg-slate-950/60 border border-slate-800 text-center text-xs text-slate-400">
+                  Belum ada perangkat klien yang terhubung ke WiFi AULA SMANSA 02 saat ini.
+                </div>
+              ` : clientDevices.map(c => `
+                <div class="p-3 rounded-xl bg-slate-950/80 border border-slate-800/90 hover:border-slate-700 flex items-start justify-between gap-2 transition">
+                  <div class="flex items-center gap-2.5 min-w-0">
+                    <div class="w-8 h-8 rounded-lg bg-slate-800 text-slate-300 flex items-center justify-center text-sm flex-shrink-0">
+                      📱
+                    </div>
+                    <div class="min-w-0">
+                      <div class="font-bold text-xs text-white truncate" title="${c.name}">${c.name}</div>
+                      <div class="text-[11px] text-slate-400 font-mono">IP: <span class="text-indigo-300 font-semibold">${c.ip}</span></div>
+                      <div class="text-[10px] text-slate-500 font-mono truncate" title="${c.mac}">MAC: ${c.mac}</div>
+                    </div>
+                  </div>
+                  <span class="text-[9px] px-1.5 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 font-bold whitespace-nowrap">
+                    ● Aktif
+                  </span>
+                </div>
+              `).join('')}
+            </div>
+          </div>
+        `;
+      } else if (portId === 2) {
+        html += `
+          <div class="bg-slate-950/90 border border-indigo-500/30 rounded-2xl p-5 shadow-lg space-y-3">
+            <div class="flex items-center gap-3">
+              <div class="w-10 h-10 rounded-xl bg-indigo-500/20 text-indigo-400 flex items-center justify-center text-lg font-bold border border-indigo-500/30">
+                💻
+              </div>
+              <div>
+                <h4 class="font-bold text-white text-sm sm:text-base">Laptop Administrator (BarQie)</h4>
+                <p class="text-xs text-indigo-300 font-mono">IP: 192.168.88.254 • MAC: 7C:10:C9:24:89:A3</p>
+              </div>
+            </div>
+            <div class="p-3 rounded-xl bg-slate-900 border border-slate-800 text-xs text-slate-300 space-y-1">
+              <div class="flex justify-between"><span>Status Koneksi:</span> <strong class="text-emerald-400">Kabel LAN Port 2 (Langsung)</strong></div>
+              <div class="flex justify-between"><span>Kecepatan Link:</span> <strong class="text-white font-mono">1 Gbps Full-Duplex</strong></div>
+              <div class="flex justify-between"><span>Akses:</span> <strong class="text-indigo-300">Hak Akses Penuh / Dashboard MikroTik</strong></div>
+            </div>
+          </div>
+        `;
+      } else if (portId === 1) {
+        html += `
+          <div class="bg-slate-950/90 border border-red-500/30 rounded-2xl p-5 shadow-lg space-y-3">
+            <div class="flex items-center gap-3">
+              <div class="w-10 h-10 rounded-xl bg-red-500/20 text-red-400 flex items-center justify-center text-lg font-bold border border-red-500/30">
+                🌐
+              </div>
+              <div>
+                <h4 class="font-bold text-white text-sm sm:text-base">Modem Indibiz Telkom (300 Mbps)</h4>
+                <p class="text-xs text-red-300 font-mono">IP: 192.168.1.19 • Gateway Indibiz: 192.168.1.1</p>
+              </div>
+            </div>
+            <div class="p-3 rounded-xl bg-slate-900 border border-slate-800 text-xs text-slate-300 space-y-1">
+              <div class="flex justify-between"><span>Jalur:</span> <strong class="text-white">WAN 1 (Ethernet 1 MikroTik)</strong></div>
+              <div class="flex justify-between"><span>Mode:</span> <strong class="text-emerald-400">DHCP Client (IP Otomatis dari Modem)</strong></div>
+              <div class="flex justify-between"><span>Kecepatan Link:</span> <strong class="text-white font-mono">1 Gbps Full-Duplex</strong></div>
+              <div class="flex justify-between"><span>Status Internet:</span> <strong class="text-emerald-400">Aktif & Normal (Online)</strong></div>
+            </div>
+          </div>
+        `;
+      } else {
+        html += `
+          <div class="bg-slate-950/80 border border-slate-800 rounded-2xl p-6 text-center space-y-3">
+            <div class="text-3xl">🔌</div>
+            <h4 class="font-bold text-white text-sm">Port ${portId} Kosong (Belum Digunakan)</h4>
+            <p class="text-xs text-slate-400 max-w-md mx-auto">
+              Port fisik ${port.name} saat ini tidak dicolokkan kabel LAN. Anda dapat menggunakannya sebagai jalur cadangan untuk Switch Hub tambahan atau PC langsung jika diperlukan.
+            </p>
+          </div>
+        `;
+      }
+
+      bodyEl.innerHTML = html;
     }
 
     // ==========================================
@@ -2773,11 +3052,24 @@
       if (pillsContainer) {
         let pillsHtml = `
           <button onclick="setWifiFilter('all')" class="flex-shrink-0 px-3 py-1.5 rounded-xl text-xs font-semibold transition ${currentWifiFilter === 'all' ? 'bg-indigo-600 text-white shadow' : 'bg-slate-800 text-slate-300 hover:text-white'}">
-            🌐 Semua WiFi (${total})
+            🌐 Semua Klien (${total})
           </button>
         `;
+
+        // Pill Khusus WiFi AULA SMANSA 02 (Switch Hub)
+        const aulaCount = clientsData.filter(c => (c.wifiName || '').includes('AULA') || (c.wifiName || '').includes('Switch Hub')).length;
+        if (aulaCount > 0) {
+          const isAulaSelected = currentWifiFilter === 'aula';
+          pillsHtml += `
+            <button onclick="setWifiFilter('aula')" class="flex-shrink-0 px-3 py-1.5 rounded-xl text-xs font-semibold transition flex items-center gap-1.5 ${isAulaSelected ? 'bg-emerald-600 text-white shadow' : 'bg-emerald-950/40 text-emerald-300 hover:bg-emerald-900/50 border border-emerald-700/40'}">
+              <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+              <span>📶 WiFi AULA SMANSA 02 (${aulaCount})</span>
+            </button>
+          `;
+        }
+
         wifiData.forEach(w => {
-          const count = clientsData.filter(c => c.wifiId === w.id).length;
+          const count = clientsData.filter(c => c.wifiId === w.id && !((c.wifiName || '').includes('AULA'))).length;
           const isSelected = currentWifiFilter === w.id;
           pillsHtml += `
             <button onclick="setWifiFilter(${w.id})" class="flex-shrink-0 px-3 py-1.5 rounded-xl text-xs font-medium transition flex items-center gap-1.5 ${isSelected ? 'bg-indigo-600 text-white shadow' : 'bg-slate-800/80 text-slate-300 hover:text-white'}">
@@ -2804,6 +3096,8 @@
         // WiFi filter
         if (currentWifiFilter === 'blocked') {
           if (!c.isBlocked && c.status !== 'blocked') return false;
+        } else if (currentWifiFilter === 'aula') {
+          if (!(c.wifiName || '').includes('AULA') && !(c.wifiName || '').includes('Switch Hub')) return false;
         } else if (currentWifiFilter !== 'all') {
           if (c.wifiId !== currentWifiFilter) return false;
         }
@@ -3299,12 +3593,28 @@
       }
     }, 4500);
 
-    // Auto-refresh physical ports every 3.5s when topology tab is open
+    // Real-Time Auto-Refresh Live Clients dari MikroTik setiap 4 detik
+    setInterval(async () => {
+      try {
+        const res = await fetch(apiUrl('/api/clients'));
+        if (res.ok) {
+          const json = await res.json();
+          if (json.isLiveHardware && Array.isArray(json.clients)) {
+            clientsData = json.clients;
+            updateDataModeBadge(false, clientsData.length);
+            saveClientsState();
+            const secClients = document.getElementById('section-clients');
+            if (secClients && !secClients.classList.contains('hidden')) {
+              renderClients();
+            }
+          }
+        }
+      } catch (e) {}
+    }, 4000);
+
+    // Auto-refresh physical ports setiap 3.5 detik (Real-Time Sensor)
     setInterval(() => {
-      const secTopo = document.getElementById('section-topology');
-      if (secTopo && !secTopo.classList.contains('hidden')) {
-        fetchPortsData(false);
-      }
+      fetchPortsData(false);
     }, 3500);
 
     // Init

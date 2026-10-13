@@ -222,14 +222,16 @@ const server = http.createServer(async (req, res) => {
     try {
       const ifaces = await mikrotikRequest('/interface');
       let hosts = [];
+      let leases = [];
       try { hosts = await mikrotikRequest('/interface/bridge/host'); } catch (e) {}
+      try { leases = await mikrotikRequest('/ip/dhcp-server/lease'); } catch (e) {}
 
       const portMap = [
         { id: 1, iface: 'ether1', label: 'Port 1 (WAN)', desc: 'Sumber Internet Indibiz 300M' },
-        { id: 2, iface: 'ether2', label: 'Port 2 (LAN)', desc: 'Ke Switch Hub TL-SG1016D' },
-        { id: 3, iface: 'ether3', label: 'Port 3 (LAN)', desc: 'Jalur Port 3 MikroTik' },
-        { id: 4, iface: 'ether4', label: 'Port 4 (LAN)', desc: 'Jalur Port 4 MikroTik' },
-        { id: 5, iface: 'ether5', label: 'Port 5 (LAN)', desc: 'Jalur Port 5 MikroTik' },
+        { id: 2, iface: 'ether2', label: 'Port 2 (LAN)', desc: 'Laptop Admin BarQie' },
+        { id: 3, iface: 'ether3', label: 'Port 3 (LAN)', desc: 'Switch Hub TP-Link TL-SG1016D' },
+        { id: 4, iface: 'ether4', label: 'Port 4 (LAN)', desc: 'Port Cadangan MikroTik' },
+        { id: 5, iface: 'ether5', label: 'Port 5 (LAN)', desc: 'Port Cadangan MikroTik' },
       ];
 
       const ports = portMap.map(p => {
@@ -237,22 +239,76 @@ const server = http.createServer(async (req, res) => {
         const isRunning = item.running === 'true' || item.running === true;
         
         let connectedDevice = 'Kosong';
+        let detailDevices = [];
+
         if (p.id === 1) {
           connectedDevice = isRunning ? 'Modem Indibiz 300 Mbps (IP: 192.168.1.19)' : 'Kabel Lepas / Tidak Terhubung';
-        } else {
-          const portHosts = hosts.filter(h => (h.interface === p.iface || h['on-interface'] === p.iface) && h.local !== 'true');
-          if (portHosts.length > 1) {
-            connectedDevice = `Switch Hub TL-SG1016D (${portHosts.length} Perangkat Aktif: Access Point U6-LR, TP-Link, dll)`;
-          } else if (portHosts.length === 1) {
-            const h = portHosts[0];
-            connectedDevice = h['mac-address'] === '7C:10:C9:24:89:A3' 
-              ? 'Laptop Admin (BarQie - 192.168.88.254)' 
-              : `Perangkat (${h['mac-address']})`;
-          } else if (isRunning) {
-            connectedDevice = 'Kabel Terhubung (1 Gbps)';
-          } else {
-            connectedDevice = 'Mati / Tidak Ada Sinyal (Kabel Lepas / Kosong)';
+          if (isRunning) {
+            detailDevices.push({
+              name: 'Modem Indibiz Telkom',
+              ip: '192.168.1.19 (Gateway 192.168.1.1)',
+              mac: 'Port Ether 1',
+              type: 'modem',
+              status: 'Internet 300 Mbps Normal'
+            });
           }
+        } else if (p.id === 2) {
+          connectedDevice = isRunning ? 'Laptop Admin (BarQie - 192.168.88.254)' : 'Mati / Tidak Ada Sinyal';
+          if (isRunning) {
+            detailDevices.push({
+              name: 'Laptop Administrator (BarQie)',
+              ip: '192.168.88.254',
+              mac: '7C:10:C9:24:89:A3',
+              type: 'laptop',
+              status: 'Koneksi Langsung Kabel LAN Port 2 (1 Gbps)'
+            });
+          }
+        } else if (p.id === 3) {
+          const portHosts = hosts.filter(h => (h.interface === p.iface || h['on-interface'] === p.iface) && h.local !== 'true');
+          const clientLeases = Array.isArray(leases) ? leases.filter(l => (l['active-mac-address'] || l['mac-address']) !== '7C:10:C9:24:89:A3') : [];
+          
+          if (isRunning) {
+            connectedDevice = `Switch Hub TL-SG1016D (${clientLeases.length} HP Terhubung • WiFi AULA SMANSA 02)`;
+            
+            // Access Point
+            detailDevices.push({
+              name: 'Access Point WiFi: AULA SMANSA 02',
+              ip: '192.168.0.100 (DHCP / Static)',
+              mac: '60:22:32:AB:48:A9',
+              type: 'ap',
+              vendor: 'Ubiquiti UniFi 6 Long-Range (U6-LR)',
+              status: 'Memancarkan SSID WiFi: AULA SMANSA 02'
+            });
+
+            // Connected client phones/tablets
+            clientLeases.forEach(l => {
+              const hName = l['host-name'] || 'Perangkat Klien';
+              let formattedName = hName;
+              if (hName === 'POCO-X8-Pro-Max') formattedName = 'HP Xiaomi POCO X8 Pro Max (Siswa/Guru)';
+              else if (hName === 'POCO-F6') formattedName = 'HP Xiaomi POCO F6 (Siswa)';
+              else if (hName === 'iPhone-Zua') formattedName = 'Apple iPhone (Zua)';
+              else if (hName === 'iPhone') formattedName = 'Apple iPhone';
+              else if (hName === 'V2434') formattedName = 'HP Vivo V2434';
+              else if (hName === 'V2217') formattedName = 'HP Vivo V2217';
+              else if (hName === 'TB321FU') formattedName = 'Tablet Lenovo TB321FU';
+              else if (hName === 'realme-C30s') formattedName = 'HP Realme C30s';
+              else if (hName === 'OPPO-A31') formattedName = 'HP OPPO A31';
+              else if (hName === 'Samsung') formattedName = 'HP Samsung Galaxy';
+
+              detailDevices.push({
+                name: formattedName,
+                hostname: hName,
+                ip: l['active-address'] || l.address,
+                mac: l['active-mac-address'] || l['mac-address'],
+                type: 'phone',
+                status: 'Aktif di WiFi AULA SMANSA 02'
+              });
+            });
+          } else {
+            connectedDevice = 'Mati / Tidak Ada Sinyal (Kabel Lepas / Switch Hub Mati)';
+          }
+        } else {
+          connectedDevice = isRunning ? 'Kabel Terhubung' : 'Kosong (Belum Dipakai)';
         }
 
         return {
@@ -262,7 +318,8 @@ const server = http.createServer(async (req, res) => {
           running: isRunning,
           status: isRunning ? 'UP (Terhubung)' : 'DOWN (Mati / Lepas)',
           speed: isRunning ? '1 Gbps Full-Duplex' : 'Tidak Ada Sinyal',
-          device: connectedDevice
+          device: connectedDevice,
+          detailDevices: detailDevices
         };
       });
 
@@ -400,23 +457,46 @@ const server = http.createServer(async (req, res) => {
             }
 
             let wifiId = 1;
-            let wifiName = "Jaringan LAN / Switch Hub (Ether 2)";
-            if (ip.startsWith("192.168.88.11")) { wifiId = 1; wifiName = "WiFi 1 (Ruang Guru & TU)"; }
-            else if (ip.startsWith("192.168.88.12")) { wifiId = 2; wifiName = "WiFi 2 (Lab Komputer)"; }
-            else if (ip.startsWith("192.168.88.13")) { wifiId = 3; wifiName = "WiFi 3 (Perpustakaan)"; }
-            else if (ip.startsWith("192.168.88.14")) { wifiId = 4; wifiName = "WiFi 4 (Kelas X & XI)"; }
-            else if (ip.startsWith("192.168.88.15")) { wifiId = 5; wifiName = "WiFi 5 (Kelas XII)"; }
-            else if (ip.startsWith("192.168.88.16")) { wifiId = 6; wifiName = "WiFi 6 (Tamu & Lapangan)"; }
+            let wifiName = "WiFi AULA SMANSA 02 (Switch Hub)";
+            let customName = hostname;
+
+            if (hostname === 'BarQie' || mac === '7C:10:C9:24:89:A3') {
+              wifiName = "Kabel LAN Port 2 (Laptop Admin)";
+              customName = "Laptop Admin (BarQie)";
+              deviceType = "laptop";
+            } else {
+              if (hostname === 'POCO-X8-Pro-Max') customName = 'HP POCO X8 Pro Max (Siswa/Guru)';
+              else if (hostname === 'POCO-F6') customName = 'HP POCO F6 (Siswa)';
+              else if (hostname === 'iPhone-Zua') customName = 'Apple iPhone (Zua)';
+              else if (hostname === 'iPhone') customName = 'Apple iPhone';
+              else if (hostname === 'V2434') customName = 'HP Vivo V2434';
+              else if (hostname === 'V2217') customName = 'HP Vivo V2217';
+              else if (hostname === 'TB321FU') { customName = 'Tablet Lenovo TB321FU'; deviceType = 'tablet'; }
+              else if (hostname === 'realme-C30s') customName = 'HP Realme C30s';
+              else if (hostname === 'OPPO-A31') customName = 'HP OPPO A31';
+              else if (hostname === 'Samsung') customName = 'HP Samsung Galaxy';
+            }
+
+            let vendor = 'Network Client';
+            if (classId.includes('MSFT') || hostname === 'BarQie') vendor = 'Microsoft Windows';
+            else if (classId.includes('android')) vendor = 'Android';
+            else if (hostname.toLowerCase().includes('iphone')) vendor = 'Apple Inc.';
+            else if (hostname.toLowerCase().includes('poco') || hostname.toLowerCase().includes('xiaomi')) vendor = 'Xiaomi';
+            else if (hostname.startsWith('V2')) vendor = 'Vivo';
+            else if (hostname.toLowerCase().includes('oppo')) vendor = 'OPPO';
+            else if (hostname.toLowerCase().includes('realme')) vendor = 'Realme';
+            else if (hostname.toLowerCase().includes('samsung')) vendor = 'Samsung';
+            else if (hostname.toLowerCase().includes('tb321')) vendor = 'Lenovo';
 
             return {
               id: l['.id'] || mac,
               wifiId: wifiId,
               wifiName: wifiName,
               hostname: hostname,
-              customName: hostname === 'BarQie' ? 'PC/Laptop Administrator (BarQie)' : hostname,
+              customName: customName,
               ip: ip,
               mac: mac,
-              vendor: classId.includes('MSFT') ? 'Microsoft Windows' : 'Network Client',
+              vendor: vendor,
               deviceType: deviceType,
               downloadSpeed: 1.5,
               uploadSpeed: 0.3,
