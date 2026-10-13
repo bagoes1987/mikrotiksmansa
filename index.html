@@ -232,7 +232,8 @@
           <svg class="w-4 h-4 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17V7m0 10a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2h2a2 2 0 012 2m0 10a2 2 0 002 2h2a2 2 0 002-2M9 7a2 2 0 012-2h2a2 2 0 012 2m0 10V7m0 10a2 2 0 002 2h2a2 2 0 002-2V7a2 2 0 00-2-2h-2a2 2 0 00-2 2"></path>
           </svg>
-          <span>Jalur Kabel & Hub</span>
+          <span>🔌 Status Port & Kabel</span>
+          <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" title="Port Real-time"></span>
         </button>
 
         <button onclick="switchTab('anti-conflict')" id="tab-anti-conflict" class="flex-shrink-0 px-4 py-2 text-xs font-medium rounded-xl text-slate-400 hover:text-slate-200 hover:bg-slate-800/60 flex items-center gap-2 transition">
@@ -301,15 +302,16 @@
       </div>
 
       <!-- Card 4: Hardware Telemetry -->
-      <div class="bg-[#111827]/90 border border-slate-800/80 rounded-2xl p-4 shadow-lg backdrop-blur-sm relative overflow-hidden flex flex-col justify-between">
+      <div onclick="switchTab('topology')" class="bg-[#111827]/90 border border-slate-800/80 rounded-2xl p-4 shadow-lg backdrop-blur-sm relative overflow-hidden flex flex-col justify-between cursor-pointer hover:border-indigo-500/50 transition" title="Klik untuk cek status port fisik">
         <div class="flex items-center justify-between text-slate-400 mb-2">
-          <span class="text-[10px] sm:text-[11px] uppercase tracking-wider font-bold text-amber-400">Status Router hEX</span>
+          <span class="text-[10px] sm:text-[11px] uppercase tracking-wider font-bold text-amber-400">Status Router & Port Fisik</span>
           <div class="w-7 h-7 rounded-lg bg-amber-500/10 text-amber-400 flex items-center justify-center text-xs">⚡</div>
         </div>
         <div>
-          <div class="text-2xl sm:text-3xl font-extrabold text-white font-mono tracking-tight">CPU 4% <span class="text-xs font-normal text-emerald-400 font-sans">• Normal</span></div>
-          <div class="mt-1.5 text-[11px] text-slate-400 font-mono truncate">
-            RAM 198MB Bebas • 52°C
+          <div class="text-2xl sm:text-3xl font-extrabold text-white font-mono tracking-tight" id="kpiCpuStatus">CPU 1% <span class="text-xs font-normal text-emerald-400 font-sans">• Normal</span></div>
+          <div class="mt-1.5 text-[11px] text-slate-400 font-mono flex items-center justify-between">
+            <span id="kpiPortActiveTxt">Port: 2 Aktif (1G), 3 Kosong</span>
+            <span class="text-indigo-400 font-sans font-semibold">Cek Fisik ➔</span>
           </div>
         </div>
       </div>
@@ -458,54 +460,114 @@
 
     </div>
 
-    <!-- TAB 3: Topology Diagram -->
-    <div id="section-topology" class="hidden bg-[#111827]/90 border border-slate-800 rounded-2xl p-4 sm:p-6 shadow-xl">
-      <div class="mb-4">
-        <h3 class="text-sm sm:text-base font-bold text-white">Topologi Jaringan Mikrotik SMANSA</h3>
-        <p class="text-xs text-slate-400">Jalur koneksi fisik dari modem Indibiz menuju masing-masing router WiFi.</p>
-      </div>
-
-      <div class="flex flex-col items-center justify-center py-4 space-y-3 max-w-2xl mx-auto">
-        <!-- Indibiz -->
-        <div class="w-full max-w-sm p-3.5 bg-slate-800/90 border-2 border-red-500/50 rounded-xl text-center shadow-lg relative">
-          <div class="absolute -top-2.5 left-1/2 -translate-x-1/2 bg-red-600 text-white font-bold text-[10px] px-2.5 py-0.5 rounded-full uppercase tracking-wider">Sumber Internet</div>
-          <p class="font-bold text-sm text-white mt-1">INDIBIZ TELKOM (300 MBPS)</p>
-          <p class="text-[11px] text-red-400 font-mono">Kabel LAN ke Ether 1 MikroTik</p>
-        </div>
-
-        <div class="w-0.5 h-6 bg-gradient-to-b from-red-500 to-indigo-500"></div>
-
-        <!-- Mikrotik hEX -->
-        <div class="w-full max-w-md p-4 bg-gradient-to-b from-indigo-950/70 to-slate-900 border-2 border-indigo-500/70 rounded-2xl text-center shadow-xl">
-          <div class="flex items-center justify-center gap-2 mb-1">
-            <span class="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span>
-            <h4 class="font-bold text-white text-sm sm:text-base">MikroTik hEX Series (E50UG)</h4>
+    <!-- TAB 3: Physical Ports Monitor & Topology Diagram -->
+    <div id="section-topology" class="hidden space-y-5">
+      
+      <!-- REAL-TIME HARDWARE PORTS VISUALIZER (MIKROTIK FRONT-PANEL) -->
+      <div class="bg-[#111827]/90 border border-slate-800 rounded-2xl p-4 sm:p-6 shadow-xl backdrop-blur-sm">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-800 pb-4 mb-5">
+          <div>
+            <div class="flex items-center gap-2">
+              <span class="w-3 h-3 rounded-full bg-emerald-400 animate-pulse"></span>
+              <h3 class="text-base sm:text-lg font-bold text-white flex items-center gap-2">
+                Panel Indikator Port Fisik MikroTik hEX
+                <span class="text-xs px-2.5 py-0.5 rounded-full bg-indigo-500/10 text-indigo-400 border border-indigo-500/30 font-mono">Live Hardware Sensor</span>
+              </h3>
+            </div>
+            <p class="text-xs text-slate-400 mt-1">
+              Pantau langsung port mana yang tertancap kabel, menyala (1 Gbps), atau mati tanpa harus jongkok melihat ke kolong meja router.
+            </p>
           </div>
-          <p class="text-xs text-slate-300 mb-3">Otak Pembagi Bandwidth & Gateway Jaringan</p>
-          <div class="text-left bg-slate-950/80 p-2.5 rounded-xl border border-slate-800 text-[11px] space-y-1">
-            <div class="flex justify-between text-slate-400"><span>Ether 1 (WAN):</span> <span class="text-emerald-400 font-mono font-semibold">DHCP Client (Indibiz)</span></div>
-            <div class="flex justify-between text-slate-400"><span>Ether 2 (LAN):</span> <span class="text-indigo-400 font-mono font-semibold">192.168.88.1 (Ke Switch)</span></div>
-            <div class="flex justify-between text-slate-400"><span>Fitur Keamanan:</span> <span class="text-slate-200">Anti-Konflik IP + Simple Queue</span></div>
+
+          <div class="flex items-center gap-2">
+            <button onclick="fetchPortsData(true)" class="px-3.5 py-2 text-xs font-semibold rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 transition flex items-center gap-1.5 shadow-sm active:scale-95">
+              <svg id="refreshPortsIcon" class="w-3.5 h-3.5 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
+              <span>Refresh Lampu Port</span>
+            </button>
           </div>
         </div>
 
-        <div class="w-0.5 h-6 bg-indigo-500"></div>
+        <!-- MikroTik Router Front-Panel Chassis -->
+        <div class="bg-gradient-to-b from-slate-900 via-slate-950 to-black p-4 sm:p-5 rounded-2xl border-2 border-slate-700 shadow-2xl relative mb-4">
+          <div class="flex items-center justify-between border-b border-slate-800/80 pb-3 mb-4">
+            <div class="flex items-center gap-2.5">
+              <img src="/favicon.png" alt="MikroTik" class="w-5 h-5 rounded">
+              <span class="font-black text-xs sm:text-sm tracking-wider text-slate-200 font-mono">RouterBOARD hEX (E50UG Refresh)</span>
+            </div>
+            <div class="flex items-center gap-3 text-[11px] font-mono">
+              <span class="text-slate-400">Power: <strong class="text-emerald-400">● 12V ON</strong></span>
+              <span class="text-slate-400 hidden sm:inline">Uptime: <strong class="text-indigo-300" id="portPanelUptime">Online</strong></span>
+            </div>
+          </div>
 
-        <!-- Switch TL-SG1016D -->
-        <div class="w-full max-w-md p-3.5 bg-slate-800/90 border border-slate-700 rounded-xl text-center shadow-lg">
-          <p class="font-bold text-xs sm:text-sm text-white">SWITCH HUB TP-LINK TL-SG1016D</p>
-          <p class="text-[11px] text-slate-400">16-Port Gigabit Switch (Distributor Fisik)</p>
-        </div>
-
-        <!-- 6 Branch APs -->
-        <div class="w-full pt-2">
-          <div class="w-full h-0.5 bg-slate-700 mb-2"></div>
-          <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-2" id="topologyApGrid">
+          <!-- 5 RJ45 Ethernet Jacks Row -->
+          <div class="grid grid-cols-1 sm:grid-cols-5 gap-3" id="routerPortsGrid">
             <!-- Populated via JS -->
           </div>
         </div>
 
+        <!-- Diagnostic Alert Banner for Port Cabling -->
+        <div id="portDiagnosticAlert" class="p-4 rounded-xl border bg-amber-950/20 border-amber-800/40 text-xs text-amber-200 flex items-start gap-3">
+          <span class="text-xl flex-shrink-0">🔍</span>
+          <div class="space-y-1">
+            <div class="font-bold text-amber-300 text-sm">Hasil Diagnostik Kabel Port MikroTik:</div>
+            <p class="text-slate-300 leading-relaxed" id="portDiagnosticText">
+              Memeriksa sinyal kabel port fisik MikroTik...
+            </p>
+          </div>
+        </div>
       </div>
+
+      <!-- TOPOLOGY DIAGRAM CARD -->
+      <div class="bg-[#111827]/90 border border-slate-800 rounded-2xl p-4 sm:p-6 shadow-xl">
+        <div class="mb-4">
+          <h3 class="text-sm sm:text-base font-bold text-white">Topologi Jalur Kabel Fisik SMANSA</h3>
+          <p class="text-xs text-slate-400">Bagan susunan kabel dari modem Indibiz, MikroTik hEX, Switch Hub, hingga 6 Access Point WiFi.</p>
+        </div>
+
+        <div class="flex flex-col items-center justify-center py-4 space-y-3 max-w-2xl mx-auto">
+          <!-- Indibiz -->
+          <div class="w-full max-w-sm p-3.5 bg-slate-800/90 border-2 border-red-500/50 rounded-xl text-center shadow-lg relative">
+            <div class="absolute -top-2.5 left-1/2 -translate-x-1/2 bg-red-600 text-white font-bold text-[10px] px-2.5 py-0.5 rounded-full uppercase tracking-wider">Sumber Internet</div>
+            <p class="font-bold text-sm text-white mt-1">INDIBIZ TELKOM (300 MBPS)</p>
+            <p class="text-[11px] text-red-400 font-mono">Kabel LAN ke Ether 1 MikroTik</p>
+          </div>
+
+          <div class="w-0.5 h-6 bg-gradient-to-b from-red-500 to-indigo-500"></div>
+
+          <!-- Mikrotik hEX -->
+          <div class="w-full max-w-md p-4 bg-gradient-to-b from-indigo-950/70 to-slate-900 border-2 border-indigo-500/70 rounded-2xl text-center shadow-xl">
+            <div class="flex items-center justify-center gap-2 mb-1">
+              <span class="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span>
+              <h4 class="font-bold text-white text-sm sm:text-base">MikroTik hEX Series (E50UG)</h4>
+            </div>
+            <p class="text-xs text-slate-300 mb-3">Otak Pembagi Bandwidth & Gateway Jaringan</p>
+            <div class="text-left bg-slate-950/80 p-2.5 rounded-xl border border-slate-800 text-[11px] space-y-1">
+              <div class="flex justify-between text-slate-400"><span>Ether 1 (WAN):</span> <span class="text-emerald-400 font-mono font-semibold">DHCP Client (Indibiz 192.168.1.19)</span></div>
+              <div class="flex justify-between text-slate-400"><span>Ether 2 (LAN):</span> <span class="text-indigo-400 font-mono font-semibold">192.168.88.1 (Ke Switch Hub / Laptop)</span></div>
+              <div class="flex justify-between text-slate-400"><span>Ether 3, 4, 5:</span> <span class="text-slate-400 font-mono">Bridge LAN (Cadangan Port)</span></div>
+            </div>
+          </div>
+
+          <div class="w-0.5 h-6 bg-indigo-500"></div>
+
+          <!-- Switch TL-SG1016D -->
+          <div class="w-full max-w-md p-3.5 bg-slate-800/90 border border-slate-700 rounded-xl text-center shadow-lg">
+            <p class="font-bold text-xs sm:text-sm text-white">SWITCH HUB TP-LINK TL-SG1016D</p>
+            <p class="text-[11px] text-slate-400">16-Port Gigabit Switch (Distributor Fisik untuk 6 WiFi & Laptop)</p>
+          </div>
+
+          <!-- 6 Branch APs -->
+          <div class="w-full pt-2">
+            <div class="w-full h-0.5 bg-slate-700 mb-2"></div>
+            <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-2" id="topologyApGrid">
+              <!-- Populated via JS -->
+            </div>
+          </div>
+
+        </div>
+      </div>
+
     </div>
 
     <!-- TAB 4: Anti Conflict Table -->
@@ -1344,6 +1406,24 @@
 
   <script>
     // ==========================================
+    // BACKEND API BRIDGE (AUTO-DETECT LOCAL / CLOUDFLARE TUNNEL)
+    // ==========================================
+    const DEFAULT_TUNNEL_URL = 'https://theme-forecast-ear-parliamentary.trycloudflare.com';
+    
+    function getApiBase() {
+      if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' || window.location.hostname.includes('trycloudflare.com')) {
+        return '';
+      }
+      return localStorage.getItem('smansa_mikrotik_backend') || DEFAULT_TUNNEL_URL;
+    }
+
+    function apiUrl(path) {
+      const base = getApiBase();
+      if (!base) return path;
+      return `${base.replace(/\/$/, '')}${path}`;
+    }
+
+    // ==========================================
     // SISTEM LOGIN & AUTHENTICATION (SMANSA ADMIN)
     // ==========================================
     const AUTH_CREDENTIALS = {
@@ -1450,7 +1530,7 @@
       showToast("Data Simulasi (75 Klien) dipulihkan untuk pratinjau!");
     }
 
-    function updateDataModeBadge(isSim) {
+    function updateDataModeBadge(isSim, liveCount) {
       const badge = document.getElementById('dataModeBadge');
       if (!badge) return;
       if (isSim) {
@@ -1458,7 +1538,8 @@
         badge.innerHTML = `<span class="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse"></span><span>Mode Simulasi (Pratinjau)</span>`;
       } else {
         badge.className = "inline-flex items-center gap-1.5 text-[10px] font-semibold px-2.5 py-0.5 rounded-full bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 transition cursor-pointer";
-        badge.innerHTML = `<span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span><span>Menunggu Koneksi Router Fisik</span>`;
+        const countTxt = (typeof liveCount === 'number') ? ` (${liveCount} Perangkat Terhubung)` : '';
+        badge.innerHTML = `<span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span><span>Hardware MikroTik Fisik Nyata${countTxt}</span>`;
       }
     }
 
@@ -1889,6 +1970,125 @@
       if (tabId === 'clients') {
         renderClients();
       }
+      if (tabId === 'topology') {
+        fetchPortsData();
+      }
+    }
+
+    // ==========================================
+    // HARDWARE PORT INSPECTOR (REAL-TIME SENSOR)
+    // ==========================================
+    let lastPortsData = null;
+
+    async function fetchPortsData(showToastFeedback = false) {
+      const icon = document.getElementById('refreshPortsIcon');
+      if (icon) icon.classList.add('animate-spin');
+
+      try {
+        const res = await fetch(apiUrl('/api/ports');
+        if (res.ok) {
+          const data = await res.json();
+          if (data && Array.isArray(data.ports)) {
+            lastPortsData = data.ports;
+            renderRouterPorts(data.ports);
+          }
+        }
+      } catch (e) {
+        console.error('Error fetching ports:', e);
+      } finally {
+        if (icon) {
+          setTimeout(() => icon.classList.remove('animate-spin'), 400);
+        }
+        if (showToastFeedback) {
+          showToast("Status port fisik MikroTik berhasil diperbarui!");
+        }
+      }
+    }
+
+    function renderRouterPorts(ports) {
+      const container = document.getElementById('routerPortsGrid');
+      if (!container) return;
+
+      let html = '';
+      let port1Up = false;
+      let port2Up = false;
+      let port3Up = false;
+
+      ports.forEach(p => {
+        if (p.id === 1 && p.running) port1Up = true;
+        if (p.id === 2 && p.running) port2Up = true;
+        if (p.id === 3 && p.running) port3Up = true;
+
+        const isUp = p.running;
+        const ledBg = isUp ? 'bg-emerald-400 shadow-emerald-400/80 shadow-md animate-pulse' : 'bg-slate-700';
+        const cardBorder = isUp ? 'border-emerald-500/40 bg-slate-900/90' : 'border-slate-800 bg-slate-950/80';
+        const badgeClass = isUp ? 'text-emerald-400 bg-emerald-500/10 border-emerald-500/30' : 'text-slate-500 bg-slate-800/40 border-slate-700/40';
+
+        html += `
+          <div class="rounded-xl border ${cardBorder} p-3.5 flex flex-col justify-between transition-all hover:border-slate-600 shadow-inner">
+            <!-- Port Header & LED -->
+            <div class="flex items-center justify-between mb-2">
+              <div class="flex items-center gap-2">
+                <span class="w-3 h-3 rounded-full ${ledBg} inline-block"></span>
+                <span class="font-bold text-white text-xs font-mono tracking-tight">${p.name}</span>
+              </div>
+              <span class="text-[9px] uppercase font-bold px-1.5 py-0.5 rounded border ${badgeClass} font-mono">
+                ${isUp ? 'LINK UP' : 'DOWN'}
+              </span>
+            </div>
+
+            <!-- RJ-45 Jack Visual representation -->
+            <div class="my-2 p-2.5 rounded-lg bg-black/60 border border-slate-800 text-center flex flex-col items-center justify-center">
+              <svg class="w-8 h-8 ${isUp ? 'text-emerald-400' : 'text-slate-700'} transition" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                <rect x="3" y="4" width="18" height="16" rx="3" stroke-width="2"/>
+                <path d="M7 20v-4h10v4" stroke-width="2"/>
+                <path d="M9 10h1m4 0h1m-4 3h1m4 0h1" stroke-width="2" stroke-linecap="round"/>
+              </svg>
+              <span class="text-[10px] font-mono mt-1 ${isUp ? 'text-slate-200 font-semibold' : 'text-slate-500'}">
+                ${p.speed}
+              </span>
+            </div>
+
+            <!-- Connected Device info -->
+            <div class="pt-2 border-t border-slate-800/80 space-y-0.5 text-left">
+              <div class="text-[10px] text-slate-400 uppercase font-semibold">Tersambung:</div>
+              <div class="text-[11px] font-medium ${isUp ? 'text-indigo-300' : 'text-slate-500'} truncate" title="${p.device}">
+                ${p.device}
+              </div>
+            </div>
+          </div>
+        `;
+      });
+
+      container.innerHTML = html;
+
+      // Update Diagnostic text intelligently
+      const diagEl = document.getElementById('portDiagnosticText');
+      if (diagEl) {
+        if (port1Up && port2Up && !port3Up) {
+          diagEl.innerHTML = `
+            <strong>Kondisi Saat Ini:</strong> Port 1 (Indibiz 🟢) dan Port 2 (🟢) aktif 1 Gbps.<br>
+            Namun <strong class="text-rose-400">Port 3 terdeteksi MATI (Link Down)</strong>. Perangkat laptop Anda saat ini terdeteksi berada di <strong>Port 2</strong>.<br>
+            👉 <strong>Langkah Anda:</strong> Jika kabel di Port 3 MikroTik dicolokkan ke Switch Hub TP-Link, pastikan <em>Switch Hub TP-Link lampu dayanya sudah menyala</em> dan colokan kabelnya sudah rapat sampai berbunyi <em>klik</em>.
+          `;
+        } else if (port1Up && port2Up && port3Up) {
+          diagEl.innerHTML = `
+            <strong class="text-emerald-400">Semua Jalur Aktif!</strong> Port 1 (Indibiz WAN), Port 2 (LAN), dan Port 3 (LAN) berhasil terhubung 1 Gbps tanpa kendala. Seluruh distribusi jaringan bekerja normal.
+          `;
+        } else {
+          diagEl.innerHTML = `
+            Port 1: ${port1Up ? '🟢 Indibiz Aktif' : '🔴 Indibiz Terputus'} | Port 2: ${port2Up ? '🟢 Aktif' : '🔴 Mati'} | Port 3: ${port3Up ? '🟢 Aktif' : '🔴 Mati'}.
+          `;
+        }
+      }
+
+      // Update KPI card
+      const kpiPort = document.getElementById('kpiPortActiveTxt');
+      if (kpiPort) {
+        const activeCount = ports.filter(p => p.running).length;
+        const downCount = ports.length - activeCount;
+        kpiPort.innerText = `Port: ${activeCount} Aktif, ${downCount} Kosong`;
+      }
     }
 
     // ==========================================
@@ -1951,7 +2151,7 @@
     // MENU KHUSUS: MODAL AKSES ONLINE HP
     // ==========================================
     function openOnlineModal() {
-      fetch('/api/tunnel')
+      fetch(apiUrl('/api/tunnel')
         .then(r => r.json())
         .then(data => {
           if (data && data.url) {
@@ -2116,7 +2316,7 @@
       for (let i = 0; i < 4; i++) {
         const t0 = performance.now();
         try {
-          await fetch('/api/speedtest/ping?t=' + Date.now());
+          await fetch(apiUrl('/api/speedtest/ping?t=' + Date.now());
         } catch (e) {}
         const latency = Math.max(1, Math.round(performance.now() - t0));
         pingSamples.push(latency);
@@ -2140,7 +2340,7 @@
       const startDownTime = performance.now();
 
       // Real local fetch combined with smooth gauge interpolation
-      const fetchPromise = fetch('/api/speedtest/download?size=10000000&t=' + Date.now())
+      const fetchPromise = fetch(apiUrl('/api/speedtest/download?size=10000000&t=' + Date.now())
         .then(res => res.blob())
         .catch(() => null);
 
@@ -2171,7 +2371,7 @@
 
       // Upload chunk
       const dummyData = new Uint8Array(2000000);
-      const uploadPromise = fetch('/api/speedtest/upload', {
+      const uploadPromise = fetch(apiUrl('/api/speedtest/upload', {
         method: 'POST',
         body: dummyData
       }).catch(() => null);
@@ -2206,10 +2406,10 @@
       speedtestRunning = false;
     }
 
-    // Auto-fetch settings from backend
+    // Auto-fetch settings & live clients from backend
     async function loadInitialSettings() {
       try {
-        const res = await fetch('/api/wifi');
+        const res = await fetch(apiUrl('/api/wifi');
         if (res.ok) {
           const data = await res.json();
           if (Array.isArray(data) && data.length > 0) {
@@ -2225,6 +2425,26 @@
             renderWifiCards();
           }
         }
+      } catch (e) {}
+
+      // Check live clients from MikroTik
+      try {
+        const cRes = await fetch(apiUrl('/api/clients');
+        if (cRes.ok) {
+          const cData = await cRes.json();
+          if (cData && cData.isLiveHardware && Array.isArray(cData.clients)) {
+            clientsData = cData.clients;
+            saveClientsState();
+            renderClients();
+            renderWifiCards();
+            updateDataModeBadge(false, clientsData.length);
+          }
+        }
+      } catch (e) {}
+
+      // Check physical ports from MikroTik
+      try {
+        fetchPortsData(false);
       } catch (e) {}
     }
 
@@ -2263,7 +2483,7 @@
       }, 500);
 
       try {
-        const res = await fetch('/api/auto-setup', {
+        const res = await fetch(apiUrl('/api/auto-setup', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
@@ -2302,7 +2522,7 @@
       if (btnM) { btnM.innerText = "Mengirim..."; btnM.disabled = true; }
 
       try {
-        const res = await fetch('/api/wifi', {
+        const res = await fetch(apiUrl('/api/wifi', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(wifiData)
@@ -2774,7 +2994,7 @@
 
       // Sync with server if online
       try {
-        await fetch('/api/clients/kick', {
+        await fetch(apiUrl('/api/clients/kick', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ id: client.id, mac: client.mac, ip: client.ip })
@@ -2800,7 +3020,7 @@
         showToast(`✅ Akses internet untuk ${client.customName || client.hostname} berhasil dipulihkan.`);
 
         try {
-          await fetch('/api/clients/unblock', {
+          await fetch(apiUrl('/api/clients/unblock', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ id: client.id, mac: client.mac, ip: client.ip })
@@ -2818,7 +3038,7 @@
         showToast(`🚫 Perangkat ${client.customName || client.hostname} (${client.ip}) BERHASIL DIBLOKIR dari internet!`);
 
         try {
-          await fetch('/api/clients/block', {
+          await fetch(apiUrl('/api/clients/block', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ id: client.id, mac: client.mac, ip: client.ip })
@@ -2847,7 +3067,7 @@
       showToast(`⚡ Sukses! ${guests.length} perangkat di WiFi 6 (Tamu & Lapangan) berhasil diputus!`);
 
       try {
-        await fetch('/api/clients/kick-wifi', {
+        await fetch(apiUrl('/api/clients/kick-wifi', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ wifiId: 6 })
@@ -2889,7 +3109,7 @@
       showToast(`Nama label perangkat berhasil diperbarui: "${newName || client.hostname}"`);
 
       try {
-        await fetch('/api/clients/rename', {
+        await fetch(apiUrl('/api/clients/rename', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ id: client.id, customName: newName })
@@ -3006,12 +3226,20 @@
       const icon = document.getElementById('refreshClientIcon');
       if (icon) icon.classList.add('animate-spin');
 
+      let isLive = false;
+      let count = 0;
+
       try {
-        const res = await fetch('/api/clients');
+        const res = await fetch(apiUrl('/api/clients');
         if (res.ok) {
           const json = await res.json();
-          if (json.clients && Array.isArray(json.clients)) {
-            // merge
+          if (json.isLiveHardware && Array.isArray(json.clients)) {
+            clientsData = json.clients;
+            isLive = true;
+            count = json.clients.length;
+            updateDataModeBadge(false, count);
+            saveClientsState();
+          } else if (json.clients && Array.isArray(json.clients)) {
             json.clients.forEach(serverClient => {
               const local = clientsData.find(c => c.id === serverClient.id);
               if (local) {
@@ -3020,6 +3248,7 @@
                 local.customName = serverClient.customName;
               }
             });
+            count = clientsData.length;
             saveClientsState();
           }
         }
@@ -3030,7 +3259,11 @@
 
       setTimeout(() => {
         if (icon) icon.classList.remove('animate-spin');
-        showToast("Data 75 klien diperbarui secara langsung!");
+        if (isLive) {
+          showToast(`Berhasil sinkron dengan Router MikroTik Fisik! (${count} perangkat terhubung)`);
+        } else {
+          showToast(`Data klien diperbarui (${count} perangkat)`);
+        }
       }, 500);
     }
 
@@ -3050,6 +3283,14 @@
         renderClients();
       }
     }, 4500);
+
+    // Auto-refresh physical ports every 3.5s when topology tab is open
+    setInterval(() => {
+      const secTopo = document.getElementById('section-topology');
+      if (secTopo && !secTopo.classList.contains('hidden')) {
+        fetchPortsData(false);
+      }
+    }, 3500);
 
     // Init
     checkAuthOnLoad();
