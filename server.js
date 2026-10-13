@@ -479,10 +479,17 @@ const server = http.createServer(async (req, res) => {
               else if (hostname === 'realme-C30s') customName = 'HP Realme C30s';
               else if (hostname === 'OPPO-A31') customName = 'HP OPPO A31';
               else if (hostname === 'Samsung') customName = 'HP Samsung Galaxy';
+              else if (hostname.startsWith('WIN-') || hostname.startsWith('DESKTOP-')) {
+                customName = `Laptop Windows (${hostname})`;
+                deviceType = 'laptop';
+              }
+              else if (hostname === 'A17-milik-yaya') customName = 'HP OPPO A17 (Milik Yaya)';
+              else if (hostname.toLowerCase().includes('infinix')) customName = 'HP Infinix Note (Siswa)';
+              else if (hostname.toLowerCase().includes('redmi')) customName = 'HP Xiaomi Redmi (Siswa)';
             }
 
             let vendor = 'Network Client';
-            if (classId.includes('MSFT') || hostname === 'BarQie') vendor = 'Microsoft Windows';
+            if (classId.includes('MSFT') || hostname === 'BarQie' || hostname.startsWith('WIN-') || hostname.startsWith('DESKTOP-')) vendor = 'Microsoft Windows';
             else if (classId.includes('android')) vendor = 'Android';
             else if (hostname.toLowerCase().includes('iphone')) vendor = 'Apple Inc.';
             else if (hostname.toLowerCase().includes('poco') || hostname.toLowerCase().includes('xiaomi')) vendor = 'Xiaomi';
