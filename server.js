@@ -290,6 +290,8 @@ const server = http.createServer(async (req, res) => {
               else if (hName === 'iPhone') formattedName = 'Apple iPhone';
               else if (hName === 'V2434') formattedName = 'HP Vivo V2434';
               else if (hName === 'V2217') formattedName = 'HP Vivo V2217';
+              else if (hName === 'V2507') formattedName = 'HP Vivo V25 (Admin/Guru)';
+              else if (hName === 'V2205') formattedName = 'HP Vivo Y35 (Guru)';
               else if (hName === 'TB321FU') formattedName = 'Tablet Lenovo TB321FU';
               else if (hName === 'realme-C30s') formattedName = 'HP Realme C30s';
               else if (hName === 'OPPO-A31') formattedName = 'HP OPPO A31';
@@ -471,6 +473,8 @@ const server = http.createServer(async (req, res) => {
               else if (hostname === 'iPhone') customName = 'Apple iPhone';
               else if (hostname === 'V2434') customName = 'HP Vivo V2434';
               else if (hostname === 'V2217') customName = 'HP Vivo V2217';
+              else if (hostname === 'V2507') customName = 'HP Vivo V25 (Admin/Guru)';
+              else if (hostname === 'V2205') customName = 'HP Vivo Y35 (Guru)';
               else if (hostname === 'TB321FU') { customName = 'Tablet Lenovo TB321FU'; deviceType = 'tablet'; }
               else if (hostname === 'realme-C30s') customName = 'HP Realme C30s';
               else if (hostname === 'OPPO-A31') customName = 'HP OPPO A31';
