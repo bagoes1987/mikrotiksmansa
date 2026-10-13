@@ -79,7 +79,7 @@
       </div>
 
       <!-- Login Form -->
-      <form onsubmit="handleLogin(event)" class="space-y-4 relative">
+      <form onsubmit="handleLogin(event); return false;" class="space-y-4 relative">
         <div id="loginErrorMsg" class="hidden p-3 rounded-xl bg-red-500/10 border border-red-500/30 text-red-400 text-xs flex items-center gap-2">
           <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
           <span id="loginErrorText">Username atau password salah!</span>
@@ -106,6 +106,11 @@
               <svg id="eyeIcon" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>
             </button>
           </div>
+        </div>
+
+        <div class="p-2.5 rounded-xl bg-slate-950/70 border border-slate-800 text-[11px] text-slate-400 flex items-center justify-between">
+          <span>Akun: <strong class="text-indigo-300 font-mono">admin</strong> / <strong class="text-indigo-300 font-mono">admin</strong></span>
+          <button type="button" onclick="autoFillLogin()" class="text-indigo-400 hover:text-indigo-300 font-semibold text-[10px] underline cursor-pointer">Isi Otomatis</button>
         </div>
 
         <div class="flex items-center justify-between text-xs pt-1">
@@ -1440,8 +1445,15 @@
       }
     }
 
+    function autoFillLogin() {
+      const u = document.getElementById('loginUsername');
+      const p = document.getElementById('loginPassword');
+      if (u) u.value = 'admin';
+      if (p) p.value = 'admin';
+    }
+
     function handleLogin(e) {
-      e.preventDefault();
+      if (e && e.preventDefault) e.preventDefault();
       const u = document.getElementById('loginUsername').value.trim();
       const p = document.getElementById('loginPassword').value.trim();
       const remember = document.getElementById('rememberMe').checked;
@@ -1988,7 +2000,7 @@
       if (icon) icon.classList.add('animate-spin');
 
       try {
-        const res = await fetch(apiUrl('/api/ports');
+        const res = await fetch(apiUrl('/api/ports'));
         if (res.ok) {
           const data = await res.json();
           if (data && Array.isArray(data.ports)) {
@@ -2154,7 +2166,7 @@
     // MENU KHUSUS: MODAL AKSES ONLINE HP
     // ==========================================
     function openOnlineModal() {
-      fetch(apiUrl('/api/tunnel')
+      fetch(apiUrl('/api/tunnel'))
         .then(r => r.json())
         .then(data => {
           if (data && data.url) {
@@ -2319,7 +2331,7 @@
       for (let i = 0; i < 4; i++) {
         const t0 = performance.now();
         try {
-          await fetch(apiUrl('/api/speedtest/ping?t=' + Date.now());
+          await fetch(apiUrl('/api/speedtest/ping?t=' + Date.now()));
         } catch (e) {}
         const latency = Math.max(1, Math.round(performance.now() - t0));
         pingSamples.push(latency);
@@ -2343,7 +2355,7 @@
       const startDownTime = performance.now();
 
       // Real local fetch combined with smooth gauge interpolation
-      const fetchPromise = fetch(apiUrl('/api/speedtest/download?size=10000000&t=' + Date.now())
+      const fetchPromise = fetch(apiUrl('/api/speedtest/download?size=10000000&t=' + Date.now()))
         .then(res => res.blob())
         .catch(() => null);
 
@@ -2374,7 +2386,7 @@
 
       // Upload chunk
       const dummyData = new Uint8Array(2000000);
-      const uploadPromise = fetch(apiUrl('/api/speedtest/upload', {
+      const uploadPromise = fetch(apiUrl('/api/speedtest/upload'), {
         method: 'POST',
         body: dummyData
       }).catch(() => null);
@@ -2412,7 +2424,7 @@
     // Auto-fetch settings & live clients from backend
     async function loadInitialSettings() {
       try {
-        const res = await fetch(apiUrl('/api/wifi');
+        const res = await fetch(apiUrl('/api/wifi'));
         if (res.ok) {
           const data = await res.json();
           if (Array.isArray(data) && data.length > 0) {
@@ -2432,7 +2444,7 @@
 
       // Check live clients from MikroTik
       try {
-        const cRes = await fetch(apiUrl('/api/clients');
+        const cRes = await fetch(apiUrl('/api/clients'));
         if (cRes.ok) {
           const cData = await cRes.json();
           if (cData && cData.isLiveHardware && Array.isArray(cData.clients)) {
@@ -2486,7 +2498,7 @@
       }, 500);
 
       try {
-        const res = await fetch(apiUrl('/api/auto-setup', {
+        const res = await fetch(apiUrl('/api/auto-setup'), {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
@@ -2525,7 +2537,7 @@
       if (btnM) { btnM.innerText = "Mengirim..."; btnM.disabled = true; }
 
       try {
-        const res = await fetch(apiUrl('/api/wifi', {
+        const res = await fetch(apiUrl('/api/wifi'), {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(wifiData)
@@ -2997,7 +3009,7 @@
 
       // Sync with server if online
       try {
-        await fetch(apiUrl('/api/clients/kick', {
+        await fetch(apiUrl('/api/clients/kick'), {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ id: client.id, mac: client.mac, ip: client.ip })
@@ -3023,7 +3035,7 @@
         showToast(`✅ Akses internet untuk ${client.customName || client.hostname} berhasil dipulihkan.`);
 
         try {
-          await fetch(apiUrl('/api/clients/unblock', {
+          await fetch(apiUrl('/api/clients/unblock'), {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ id: client.id, mac: client.mac, ip: client.ip })
@@ -3041,7 +3053,7 @@
         showToast(`🚫 Perangkat ${client.customName || client.hostname} (${client.ip}) BERHASIL DIBLOKIR dari internet!`);
 
         try {
-          await fetch(apiUrl('/api/clients/block', {
+          await fetch(apiUrl('/api/clients/block'), {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ id: client.id, mac: client.mac, ip: client.ip })
@@ -3070,7 +3082,7 @@
       showToast(`⚡ Sukses! ${guests.length} perangkat di WiFi 6 (Tamu & Lapangan) berhasil diputus!`);
 
       try {
-        await fetch(apiUrl('/api/clients/kick-wifi', {
+        await fetch(apiUrl('/api/clients/kick-wifi'), {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ wifiId: 6 })
@@ -3112,7 +3124,7 @@
       showToast(`Nama label perangkat berhasil diperbarui: "${newName || client.hostname}"`);
 
       try {
-        await fetch(apiUrl('/api/clients/rename', {
+        await fetch(apiUrl('/api/clients/rename'), {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ id: client.id, customName: newName })
@@ -3233,7 +3245,7 @@
       let count = 0;
 
       try {
-        const res = await fetch(apiUrl('/api/clients');
+        const res = await fetch(apiUrl('/api/clients'));
         if (res.ok) {
           const json = await res.json();
           if (json.isLiveHardware && Array.isArray(json.clients)) {
