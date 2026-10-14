@@ -27,12 +27,22 @@ let routerConfig = {
 
 // In-memory state for settings
 let currentWifiSettings = [
-  { id: 1, name: "WiFi 1 (Ruang Guru & TU)", ip: "192.168.88.11", download: 60, upload: 20, active: true, color: "#3b82f6" },
-  { id: 2, name: "WiFi 2 (Lab Komputer)", ip: "192.168.88.12", download: 70, upload: 25, active: true, color: "#10b981" },
-  { id: 3, name: "WiFi 3 (Perpustakaan)", ip: "192.168.88.13", download: 30, upload: 10, active: true, color: "#f59e0b" },
-  { id: 4, name: "WiFi 4 (Kelas X & XI)", ip: "192.168.88.14", download: 40, upload: 15, active: true, color: "#a855f7" },
-  { id: 5, name: "WiFi 5 (Kelas XII)", ip: "192.168.88.15", download: 40, upload: 15, active: true, color: "#ec4899" },
-  { id: 6, name: "WiFi 6 (Tamu & Lapangan)", ip: "192.168.88.16", download: 20, upload: 10, active: true, color: "#06b6d4" }
+  { id: 1,  name: "Port 1 (WiFi 1)",  ip: "192.168.88.11", download: 18, upload: 6, active: true, color: "#3b82f6" },
+  { id: 2,  name: "Port 2 (WiFi 2)",  ip: "192.168.88.12", download: 18, upload: 6, active: true, color: "#10b981" },
+  { id: 3,  name: "Port 3 (WiFi 3)",  ip: "192.168.88.13", download: 18, upload: 6, active: true, color: "#f59e0b" },
+  { id: 4,  name: "Port 4 (WiFi 4)",  ip: "192.168.88.14", download: 18, upload: 6, active: true, color: "#8b5cf6" },
+  { id: 5,  name: "Port 5 (WiFi 5)",  ip: "192.168.88.15", download: 18, upload: 6, active: true, color: "#ec4899" },
+  { id: 6,  name: "Port 6 (WiFi 6)",  ip: "192.168.88.16", download: 18, upload: 6, active: true, color: "#06b6d4" },
+  { id: 7,  name: "Port 7 (WiFi 7)",  ip: "192.168.88.17", download: 18, upload: 6, active: true, color: "#f43f5e" },
+  { id: 8,  name: "Port 8 (WiFi 8)",  ip: "192.168.88.18", download: 18, upload: 6, active: true, color: "#6366f1" },
+  { id: 9,  name: "Port 9 (WiFi 9)",  ip: "192.168.88.19", download: 18, upload: 6, active: true, color: "#14b8a6" },
+  { id: 10, name: "Port 10 (WiFi 10)", ip: "192.168.88.20", download: 18, upload: 6, active: true, color: "#84cc16" },
+  { id: 11, name: "Port 11 (WiFi 11)", ip: "192.168.88.21", download: 18, upload: 6, active: true, color: "#eab308" },
+  { id: 12, name: "Port 12 (WiFi 12)", ip: "192.168.88.22", download: 18, upload: 6, active: true, color: "#f97316" },
+  { id: 13, name: "Port 13 (WiFi 13)", ip: "192.168.88.23", download: 18, upload: 6, active: true, color: "#a855f7" },
+  { id: 14, name: "Port 14 (WiFi 14)", ip: "192.168.88.24", download: 18, upload: 6, active: true, color: "#0ea5e9" },
+  { id: 15, name: "Port 15 (WiFi 15)", ip: "192.168.88.25", download: 18, upload: 6, active: true, color: "#22c55e" },
+  { id: 16, name: "Port 16 (WiFi 16)", ip: "192.168.88.26", download: 18, upload: 6, active: true, color: "#d946ef" }
 ];
 
 // Load connected clients data (75 devices)
@@ -136,7 +146,7 @@ function generateRouterOSScript(wifiList) {
   script += `  /ip firewall nat add chain=srcnat out-interface=ether1 action=masquerade comment="NAT Internet Indibiz"\n`;
   script += `}\n\n`;
 
-  script += `# 5. Anti-Konflik IP: Kunci IP Statis untuk 6 Router WiFi\n`;
+  script += `# 5. Anti-Konflik IP: Kunci IP Statis untuk 16 Port Switch Hub (WiFi 1 s/d 16)\n`;
   wifiList.forEach(w => {
     const cleanName = w.name.replace(/[^a-zA-Z0-9_-]/g, '_');
     script += `:if ([:len [/ip dhcp-server lease find address="${w.ip}"]] = 0) do={\n`;
@@ -145,7 +155,7 @@ function generateRouterOSScript(wifiList) {
   });
   script += `\n`;
 
-  script += `# 6. Simple Queues (Jatah Bandwidth WiFi 1 s/d WiFi 6)\n`;
+  script += `# 6. Simple Queues (Jatah Bandwidth Port 1 s/d Port 16 Switch Hub)\n`;
   wifiList.forEach(w => {
     const cleanName = w.name.replace(/[^a-zA-Z0-9_-]/g, '_');
     const maxLimit = `${w.upload}M/${w.download}M`;
